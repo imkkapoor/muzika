@@ -32,6 +32,7 @@ const LoginScreen = () => {
                     // token is expired
                     AsyncStorage.removeItem("token");
                     AsyncStorage.removeItem("expirationDate");
+                    AsyncStorage.removeItem("userProfile");
                 }
             }
         };
@@ -53,9 +54,7 @@ const LoginScreen = () => {
 
     useEffect(() => {
         if (response?.type === "success") {
-            console.log(response);
             const accessToken = response.authentication.accessToken;
-
             const currentTime = new Date();
             const expirationDate = currentTime.getTime() + 3600 * 1000;
             AsyncStorage.setItem("token", accessToken);
