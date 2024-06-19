@@ -1,4 +1,4 @@
-import { StyleSheet, Text, SafeAreaView, Pressable } from "react-native";
+import { Text, SafeAreaView, Pressable, View } from "react-native";
 import React, { useEffect } from "react";
 import {
     ResponseType,
@@ -8,6 +8,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { CLIENT_ID, REDIRECT_URI } from "@env";
+import { Entypo } from "@expo/vector-icons";
 
 const discovery = {
     authorizationEndpoint: "https://accounts.spotify.com/authorize",
@@ -64,21 +65,37 @@ const LoginScreen = () => {
     }, [response]);
 
     return (
-        <SafeAreaView>
-            <Text>LoginScreen</Text>
-            <Pressable
-                onPress={() => promptAsync()}
-                style={{
-                    padding: 20,
-                    margin: "auto",
-                }}
-            >
-                <Text>Sign in with spotify</Text>
-            </Pressable>
-        </SafeAreaView>
+        <View style={{ backgroundColor: "black" }}>
+            <SafeAreaView style={{ height: "100%" }}>
+                <Pressable
+                    onPress={() => promptAsync()}
+                    style={{
+                        margin: "auto",
+                        backgroundColor: "#1ED760",
+                        borderRadius: 50,
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: 215,
+                        height: 66,
+                    }}
+                >
+                    <Entypo name="spotify" size={39} color="black" />
+                    <Text
+                        style={{
+                            color: "black",
+                            fontSize: "14px",
+                            fontFamily: "Inter-SemiBold",
+                            paddingLeft: 7,
+                        }}
+                    >
+                        Sign in with Spotify
+                    </Text>
+                </Pressable>
+            </SafeAreaView>
+        </View>
     );
 };
 
 export default LoginScreen;
-
-const styles = StyleSheet.create({});

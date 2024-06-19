@@ -1,4 +1,4 @@
-import { StyleSheet, Text, SafeAreaView } from "react-native";
+import { StyleSheet, Text, SafeAreaView, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -23,12 +23,21 @@ const ProfileScreen = () => {
 
         fetchData();
     }, []);
-    
+
     return (
-        <SafeAreaView>
-            <Text>ProfileScreen</Text>
-            <Text>{userProfile?.display_name}</Text>
-        </SafeAreaView>
+        <View
+            style={{
+                backgroundColor: "black",
+                height: "100%",
+            }}
+        >
+            <SafeAreaView>
+                <Text style={{ color: "white" }}>ProfileScreen</Text>
+                <Text style={{ color: "white" }}>
+                    {userProfile?.display_name}
+                </Text>
+            </SafeAreaView>
+        </View>
     );
 };
 
