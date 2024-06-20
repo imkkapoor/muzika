@@ -60,7 +60,7 @@ const LoginScreen = () => {
             const expirationDate = currentTime.getTime() + 3600 * 1000;
             AsyncStorage.setItem("token", accessToken);
             AsyncStorage.setItem("expirationDate", expirationDate.toString());
-            navigation.navigate("Main");
+            navigation.replace("Main");
         }
     }, [response]);
 

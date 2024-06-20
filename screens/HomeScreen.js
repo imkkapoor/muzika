@@ -11,6 +11,7 @@ import {
 import React, { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+import { Audio } from "expo-av";
 
 const HomeScreen = () => {
     const navigation = useNavigation();
@@ -19,6 +20,9 @@ const HomeScreen = () => {
     const [recommendations, setRecommendations] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isPlaying, setIsPlaying] = useState(null); // Track the currently playing song
+    const [sound, setSound] = useState(null); // Audio.Sound instance
+    const [isProcessing, setIsProcessing] = useState(false); // To manage debouncing
 
     const getProfile = async () => {
         accessToken = await AsyncStorage.getItem("token");
@@ -35,6 +39,34 @@ const HomeScreen = () => {
             } catch (err) {
                 console.log(err.message);
             }
+        }
+    };
+
+    const playPauseSound = async (url, id) => {
+        if (isProcessing) {
+            return;
+        }
+        setIsProcessing(true);
+
+        try {
+            if (isPlaying === id) {
+                await sound.pauseAsync();
+                setIsPlaying(null);
+            } else {
+                if (sound) {
+                    await sound.unloadAsync();
+                }
+                const { sound: newSound } = await Audio.Sound.createAsync({
+                    uri: url,
+                });
+                setSound(newSound);
+                setIsPlaying(id);
+                await newSound.playAsync();
+            }
+        } catch (error) {
+            console.error("Error in playing sound:", error);
+        } finally {
+            setIsProcessing(false);
         }
     };
 
@@ -189,7 +221,7 @@ const HomeScreen = () => {
                         source={{ uri: userProfile?.images[1].url }}
                     />
                 </View>
-                <ScrollView>
+                <ScrollView contentContainerStyle={{ paddingBottom: 70 }}>
                     <View>
                         <Text
                             style={{
@@ -202,9 +234,43 @@ const HomeScreen = () => {
                             Recommendations:
                         </Text>
                         {recommendations.map((rec) => (
-                            <Text style={{ color: "white" }} key={rec.id}>
-                                {rec.name}
-                            </Text>
+                            <View
+                                key={rec.id}
+                                style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    marginBottom: 10,
+                                }}
+                            >
+                                <Image
+                                    style={{
+                                        width: 64,
+                                        height: 64,
+                                        resizeMode: "cover",
+                                        marginRight: 10,
+                                    }}
+                                    source={{ uri: rec.album.images[0].url }}
+                                />
+                                <Text style={{ color: "white", flex: 1 }}>
+                                    {rec.name}
+                                </Text>
+                                <Pressable
+                                    onPress={() =>
+                                        playPauseSound(rec.preview_url, rec.id)
+                                    }
+                                    style={{
+                                        padding: 10,
+                                        backgroundColor: "white",
+                                        borderRadius: 5,
+                                    }}
+                                >
+                                    <Text>
+                                        {isPlaying === rec.id
+                                            ? "Pause"
+                                            : "Play"}
+                                    </Text>
+                                </Pressable>
+                            </View>
                         ))}
                     </View>
                 </ScrollView>
