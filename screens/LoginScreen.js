@@ -1,5 +1,14 @@
-import { Text, SafeAreaView, Pressable, View } from "react-native";
-import React, { useEffect } from "react";
+import {
+    Text,
+    SafeAreaView,
+    Pressable,
+    View,
+    ImageBackground,
+    Image,
+    StyleSheet,
+    ActivityIndicator,
+} from "react-native";
+import React, { useEffect, useState } from "react";
 import {
     ResponseType,
     makeRedirectUri,
@@ -8,7 +17,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { CLIENT_ID, REDIRECT_URI } from "@env";
-import { Entypo } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 
 const discovery = {
     authorizationEndpoint: "https://accounts.spotify.com/authorize",
@@ -17,6 +26,7 @@ const discovery = {
 
 const LoginScreen = () => {
     const navigation = useNavigation();
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const checkTokenValidity = async () => {
@@ -29,6 +39,7 @@ const LoginScreen = () => {
                 if (currentTime < parseInt(expirationDate)) {
                     //token is still valid
                     navigation.replace("Main");
+                    
                 } else {
                     // token is expired
                     AsyncStorage.removeItem("token");
@@ -44,7 +55,14 @@ const LoginScreen = () => {
         {
             responseType: ResponseType.Token,
             clientId: CLIENT_ID,
-            scopes: ["user-top-read", "user-read-email"],
+            scopes: [
+                "user-top-read",
+                "user-read-email",
+                "playlist-read-private",
+                "playlist-read-collaborative",
+                "playlist-modify-private",
+                "playlist-modify-public",
+            ],
             usePKCE: false,
             redirectUri: makeRedirectUri({
                 scheme: REDIRECT_URI,
@@ -65,37 +83,99 @@ const LoginScreen = () => {
     }, [response]);
 
     return (
-        <View style={{ backgroundColor: "black" }}>
-            <SafeAreaView style={{ height: "100%" }}>
-                <Pressable
-                    onPress={() => promptAsync()}
-                    style={{
-                        margin: "auto",
-                        backgroundColor: "#1ED760",
-                        borderRadius: 50,
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: 215,
-                        height: 66,
-                    }}
-                >
-                    <Entypo name="spotify" size={39} color="black" />
-                    <Text
-                        style={{
-                            color: "black",
-                            fontSize: "14px",
-                            fontFamily: "Inter-SemiBold",
-                            paddingLeft: 7,
-                        }}
-                    >
-                        Sign in with Spotify
-                    </Text>
-                </Pressable>
-            </SafeAreaView>
-        </View>
+        <ImageBackground
+            source={require("../assets/background/login4x.png")}
+            onLoadEnd={() => setIsLoading(false)}
+        >
+            {isLoading && (
+                <View style={styles.loading}>
+                    <ActivityIndicator size="large" color="white" />
+                </View>
+            )}
+            {!isLoading && (
+                <View>
+                    <LinearGradient
+                        colors={[
+                            "rgba(0, 0, 0, 0)",
+                            "rgba(0, 0, 0, 0.49)",
+                            "rgba(0, 0, 0, 1)",
+                        ]}
+                        locations={[1, 0.74, 0.0]}
+                        style={styles.gradientTop}
+                    ></LinearGradient>
+                    <SafeAreaView style={{ height: "100%" }}>
+                        <LinearGradient
+                            colors={[
+                                "rgba(0, 0, 0, 0)",
+                                "rgba(0, 0, 0, 0.68)",
+                                "rgba(0, 0, 0, 0.94)",
+                                "rgba(0, 0, 0, 1)",
+                                "rgba(0, 0, 0, 1)",
+                            ]}
+                            locations={[0, 0.22, 0.4, 0.62, 1]}
+                            style={styles.gradientBottom}
+                        >
+                            <Pressable
+                                onPress={() => promptAsync()}
+                                style={styles.button}
+                            >
+                                <Image
+                                    source={require("../assets/background/Spotify_Primary_Logo_RGB_Green.png")}
+                                    style={styles.icon}
+                                />
+                                <Text style={styles.buttonText}>
+                                    Log in with Spotify
+                                </Text>
+                            </Pressable>
+                        </LinearGradient>
+                    </SafeAreaView>
+                </View>
+            )}
+        </ImageBackground>
     );
 };
 
 export default LoginScreen;
+
+const styles = StyleSheet.create({
+    button: {
+        margin: "auto",
+        backgroundColor: "#2d2d2d",
+        borderRadius: 50,
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 185,
+        height: 66,
+    },
+    buttonText: {
+        color: "black",
+        fontSize: 12,
+        fontFamily: "Inter-SemiBold",
+        paddingLeft: 11,
+        color: "white",
+    },
+    icon: { height: 26, width: 26 },
+    gradientBottom: {
+        flex: 1,
+        height: "40%",
+        position: "absolute",
+        bottom: 0,
+        width: "100%",
+    },
+    loading: {
+        backgroundColor: "black",
+        display: "flex",
+        alignContent: "center",
+        justifyContent: "center",
+        height: "100%",
+    },
+    gradientTop: {
+        flex: 1,
+        height: 60,
+        position: "absolute",
+        top: 0,
+        width: "100%",
+    },
+});

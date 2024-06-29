@@ -3,15 +3,14 @@ import {
     Text,
     SafeAreaView,
     View,
-    Image,
     Pressable,
     ActivityIndicator,
-    ScrollView,
+    FlatList,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
-import { Audio } from "expo-av";
+import MusicCard from "../components/MusicCard";
 
 const HomeScreen = () => {
     const navigation = useNavigation();
@@ -20,9 +19,8 @@ const HomeScreen = () => {
     const [recommendations, setRecommendations] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [isPlaying, setIsPlaying] = useState(null); // Track the currently playing song
-    const [sound, setSound] = useState(null); // Audio.Sound instance
-    const [isProcessing, setIsProcessing] = useState(false); // To manage debouncing
+    const flatListRef = useRef(null);
+    const [activeSongId, setActiveSongId] = useState(null);
 
     const getProfile = async () => {
         accessToken = await AsyncStorage.getItem("token");
@@ -39,34 +37,19 @@ const HomeScreen = () => {
             } catch (err) {
                 console.log(err.message);
             }
-        }
-    };
+        } else {
+            try {
+                const userProfileString = await AsyncStorage.getItem(
+                    "userProfile"
+                );
 
-    const playPauseSound = async (url, id) => {
-        if (isProcessing) {
-            return;
-        }
-        setIsProcessing(true);
-
-        try {
-            if (isPlaying === id) {
-                await sound.pauseAsync();
-                setIsPlaying(null);
-            } else {
-                if (sound) {
-                    await sound.unloadAsync();
+                if (userProfileString) {
+                    const userProfile = JSON.parse(userProfileString);
+                    setUserProfile(userProfile);
                 }
-                const { sound: newSound } = await Audio.Sound.createAsync({
-                    uri: url,
-                });
-                setSound(newSound);
-                setIsPlaying(id);
-                await newSound.playAsync();
+            } catch (error) {
+                console.error("Error parsing JSON string:", error);
             }
-        } catch (error) {
-            console.error("Error in playing sound:", error);
-        } finally {
-            setIsProcessing(false);
         }
     };
 
@@ -74,7 +57,7 @@ const HomeScreen = () => {
         accessToken = await AsyncStorage.getItem("token");
         try {
             const response = await fetch(
-                "https://api.spotify.com/v1/me/top/tracks?limit=5",
+                `https://api.spotify.com/v1/me/top/tracks?limit=5`,
                 {
                     headers: {
                         Authorization: `Bearer ${accessToken}`,
@@ -88,7 +71,13 @@ const HomeScreen = () => {
 
             const data = await response.json();
             setTopSongs(data.items);
+            // await AsyncStorage.setItem(
+            //     "sampleSongs",
+            //     JSON.stringify(data.items)
+            // );
         } catch (err) {
+            console.log(err);
+
             setError(err.message);
         }
     };
@@ -108,6 +97,7 @@ const HomeScreen = () => {
                 });
 
                 if (!response.ok) {
+                    console.log(response);
                     throw new Error("Network response was not ok");
                 }
 
@@ -115,8 +105,10 @@ const HomeScreen = () => {
                 const playableTracks = data.tracks.filter(
                     (track) => track.preview_url
                 );
+                setActiveSongId(playableTracks[0].id);
                 setRecommendations(playableTracks);
             } catch (err) {
+                console.log(err);
                 setError(err.message);
             } finally {
                 setLoading(false);
@@ -124,47 +116,40 @@ const HomeScreen = () => {
         }
     };
 
-    useEffect(() => {
-        getProfile();
-        getTopSongs();
-        // Just an edge case for now, as it was going back to login page on swipping back, which should not be the case
-        if (!userProfile) {
-            const fetchData = async () => {
-                try {
-                    const userProfileString = await AsyncStorage.getItem(
-                        "userProfile"
-                    );
+    // delete after
+    const sample = async () => {
+        const data = await AsyncStorage.getItem("sampleSongs");
 
-                    if (userProfileString) {
-                        const userProfile = JSON.parse(userProfileString);
-                        setUserProfile(userProfile);
-                    }
-                } catch (error) {
-                    console.error("Error parsing JSON string:", error);
-                }
-            };
-
-            fetchData();
+        if (data) {
+            const sampleSongs = JSON.parse(data);
+            setRecommendations(sampleSongs);
         }
+    };
+
+    useEffect(() => {
+        getProfile(); //edit afterwards
+        getTopSongs();
+        // sample();
+        // setRecommendations(topSongs);
+        // setLoading(false);
     }, []);
 
     useEffect(() => {
         if (topSongs.length > 0) {
+            //edit after
             getRecommendations(topSongs);
         }
     }, [topSongs]);
 
+    const onViewableItemsChanged = useCallback(({ viewableItems }) => {
+        if (viewableItems.length > 0 && viewableItems[0].isViewable) {
+            setActiveSongId(viewableItems[0].item.id);
+        }
+    }, []);
+
     if (loading) {
         return (
-            <View
-                style={{
-                    backgroundColor: "black",
-                    display: "flex",
-                    alignContent: "center",
-                    justifyContent: "center",
-                    height: "100%",
-                }}
-            >
+            <View style={styles.loading}>
                 <ActivityIndicator size="large" color="white" />
             </View>
         );
@@ -199,9 +184,17 @@ const HomeScreen = () => {
                         display: "flex",
                         flexDirection: "row",
                         justifyContent: "space-between",
+                        height: 69,
                     }}
                 >
                     <Text style={{ color: "white" }}>Spreel</Text>
+                    <Pressable
+                        onPress={() => {
+                            navigation.navigate("ChoosePlaylist");
+                        }}
+                    >
+                        <Text style={{ color: "white" }}>Choose Playlist</Text>
+                    </Pressable>
                     <Pressable
                         onPress={() => {
                             navigation.navigate("Profile");
@@ -211,69 +204,19 @@ const HomeScreen = () => {
                     </Pressable>
                 </View>
 
-                <View>
-                    <Image
-                        style={{
-                            width: 64,
-                            height: 64,
-                            resizeMode: "cover",
-                        }}
-                        source={{ uri: userProfile?.images[1].url }}
-                    />
-                </View>
-                <ScrollView contentContainerStyle={{ paddingBottom: 70 }}>
-                    <View>
-                        <Text
-                            style={{
-                                fontSize: 18,
-                                fontWeight: "bold",
-                                marginBottom: 10,
-                                color: "white",
-                            }}
-                        >
-                            Recommendations:
-                        </Text>
-                        {recommendations.map((rec) => (
-                            <View
-                                key={rec.id}
-                                style={{
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                    marginBottom: 10,
-                                }}
-                            >
-                                <Image
-                                    style={{
-                                        width: 64,
-                                        height: 64,
-                                        resizeMode: "cover",
-                                        marginRight: 10,
-                                    }}
-                                    source={{ uri: rec.album.images[0].url }}
-                                />
-                                <Text style={{ color: "white", flex: 1 }}>
-                                    {rec.name}
-                                </Text>
-                                <Pressable
-                                    onPress={() =>
-                                        playPauseSound(rec.preview_url, rec.id)
-                                    }
-                                    style={{
-                                        padding: 10,
-                                        backgroundColor: "white",
-                                        borderRadius: 5,
-                                    }}
-                                >
-                                    <Text>
-                                        {isPlaying === rec.id
-                                            ? "Pause"
-                                            : "Play"}
-                                    </Text>
-                                </Pressable>
-                            </View>
-                        ))}
-                    </View>
-                </ScrollView>
+                <FlatList
+                    data={recommendations}
+                    keyExtractor={(item) => item.id}
+                    ref={flatListRef}
+                    onViewableItemsChanged={onViewableItemsChanged}
+                    showsVerticalScrollIndicator={false}
+                    viewabilityConfig={{
+                        itemVisiblePercentThreshold: 70,
+                    }}
+                    renderItem={({ item }) => (
+                        <MusicCard item={item} activeSongId={activeSongId} />
+                    )}
+                />
             </SafeAreaView>
         </View>
     );
@@ -281,4 +224,12 @@ const HomeScreen = () => {
 
 export default HomeScreen;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+    loading: {
+        backgroundColor: "black",
+        display: "flex",
+        alignContent: "center",
+        justifyContent: "center",
+        height: "100%",
+    },
+});
