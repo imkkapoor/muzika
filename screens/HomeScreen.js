@@ -11,6 +11,8 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import MusicCard from "../components/MusicCard";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import CoustomBottomSheet from "../components/CoustomBottomSheet";
 
 const HomeScreen = () => {
     const navigation = useNavigation();
@@ -21,6 +23,10 @@ const HomeScreen = () => {
     const [error, setError] = useState(null);
     const flatListRef = useRef(null);
     const [activeSongId, setActiveSongId] = useState(null);
+    const [activeSongShareUrl, setActiveSongShareUrl] = useState(null);
+    const [activeSongName, setActiveSongName] = useState(null);
+
+    const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
 
     const getProfile = async () => {
         accessToken = await AsyncStorage.getItem("token");
@@ -71,10 +77,6 @@ const HomeScreen = () => {
 
             const data = await response.json();
             setTopSongs(data.items);
-            // await AsyncStorage.setItem(
-            //     "sampleSongs",
-            //     JSON.stringify(data.items)
-            // );
         } catch (err) {
             console.log(err);
 
@@ -106,6 +108,8 @@ const HomeScreen = () => {
                     (track) => track.preview_url
                 );
                 setActiveSongId(playableTracks[0].id);
+                setActiveSongShareUrl(playableTracks[0].external_urls.spotify);
+                setActiveSongName(playableTracks[0].name);
                 setRecommendations(playableTracks);
             } catch (err) {
                 console.log(err);
@@ -144,6 +148,8 @@ const HomeScreen = () => {
     const onViewableItemsChanged = useCallback(({ viewableItems }) => {
         if (viewableItems.length > 0 && viewableItems[0].isViewable) {
             setActiveSongId(viewableItems[0].item.id);
+            setActiveSongShareUrl(viewableItems[0].item.external_urls.spotify);
+            setActiveSongName(viewableItems[0].item.name);
         }
     }, []);
 
@@ -204,19 +210,34 @@ const HomeScreen = () => {
                     </Pressable>
                 </View>
 
-                <FlatList
-                    data={recommendations}
-                    keyExtractor={(item) => item.id}
-                    ref={flatListRef}
-                    onViewableItemsChanged={onViewableItemsChanged}
-                    showsVerticalScrollIndicator={false}
-                    viewabilityConfig={{
-                        itemVisiblePercentThreshold: 70,
-                    }}
-                    renderItem={({ item }) => (
-                        <MusicCard item={item} activeSongId={activeSongId} />
-                    )}
-                />
+                <GestureHandlerRootView style={styles}>
+                    <FlatList
+                        data={recommendations}
+                        keyExtractor={(item) => item.id}
+                        ref={flatListRef}
+                        onViewableItemsChanged={onViewableItemsChanged}
+                        showsVerticalScrollIndicator={false}
+                        viewabilityConfig={{
+                            itemVisiblePercentThreshold: 70,
+                        }}
+                        renderItem={({ item }) => (
+                            <MusicCard
+                                item={item}
+                                activeSongId={activeSongId}
+                                setIsBottomSheetVisible={
+                                    setIsBottomSheetVisible
+                                }
+                            />
+                        )}
+                        contentContainerStyle={{ paddingBottom: 150 }}
+                    />
+                    <CoustomBottomSheet
+                        isVisible={isBottomSheetVisible}
+                        onClose={() => setIsBottomSheetVisible(false)}
+                        url={activeSongShareUrl}
+                        name={activeSongName}
+                    />
+                </GestureHandlerRootView>
             </SafeAreaView>
         </View>
     );
