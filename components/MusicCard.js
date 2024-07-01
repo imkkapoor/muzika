@@ -1,8 +1,8 @@
-import { Button, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Audio } from "expo-av";
 import { Marquee } from "@animatereactnative/marquee";
-import { Play, Pause, DotsThree, PlusCircle } from "phosphor-react-native";
+import { Play, DotsThree, PlusCircle } from "phosphor-react-native";
 
 const MusicCard = ({ item, activeSongId, setIsBottomSheetVisible }) => {
     const [isPlaying, setIsPlaying] = useState(false);
@@ -101,7 +101,9 @@ const MusicCard = ({ item, activeSongId, setIsBottomSheetVisible }) => {
                     />
                     <View style={styles.iconContainer}>
                         {!isPlaying && activeSongId === item.id && (
-                            <Play weight="fill" color="white" size={36} />
+                            <View style={styles.playButtonBackground}>
+                                <Play weight="fill" color="white" size={36} />
+                            </View>
                         )}
                     </View>
                 </View>
@@ -119,12 +121,11 @@ const MusicCard = ({ item, activeSongId, setIsBottomSheetVisible }) => {
                         <Marquee
                             speed={0.3}
                             spacing={20}
-                            style={{ width: 240 }}
+                            style={{ width: 240, marginRight: 60 }}
                         >
                             <Text style={styles.artist}>{artistNames}</Text>
                         </Marquee>
                         <Pressable
-                            // title="Show More"
                             onPress={() => setIsBottomSheetVisible(true)}
                         >
                             <DotsThree weight="bold" color="white" size={36} />
@@ -206,7 +207,7 @@ const styles = StyleSheet.create({
         position: "absolute",
         top: "50%",
         left: "50%",
-        transform: [{ translateX: -18 }, { translateY: -18 }],
+        transform: [{ translateX: -18 }, { translateY: -36 }],
     },
 
     shareAndArtist: {
@@ -223,5 +224,15 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         width: 332,
         alignContent: "center",
+    },
+    playButtonBackground: {
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        transform: [{ translateX: -18 }],
+        height: 78,
+        width: 78,
+        backgroundColor: "rgba(0,0,0,0.5)",
+        borderRadius: 50,
     },
 });
