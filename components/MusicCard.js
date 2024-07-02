@@ -1,8 +1,9 @@
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Audio } from "expo-av";
 import { Marquee } from "@animatereactnative/marquee";
 import { Play, DotsThree, PlusCircle } from "phosphor-react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 const MusicCard = ({ item, activeSongId, setIsBottomSheetVisible }) => {
     const [isPlaying, setIsPlaying] = useState(false);
@@ -40,6 +41,20 @@ const MusicCard = ({ item, activeSongId, setIsBottomSheetVisible }) => {
             });
         }
     }, [sound]);
+
+    useFocusEffect(
+        useCallback(() => {
+            if (activeSongId === item.id && sound) {
+                playSound(); // Resume playing when screen comes into focus
+                setIsPlaying(true);
+            }
+            return () => {
+                if (sound) {
+                    pauseSound(); // Pause when screen loses focus
+                }
+            };
+        }, [activeSongId, sound])
+    );
 
     const loadAndPlaySound = async () => {
         try {
@@ -87,6 +102,10 @@ const MusicCard = ({ item, activeSongId, setIsBottomSheetVisible }) => {
         }
     };
 
+    const handleBottomSheetVisible = useCallback(() => {
+        setIsBottomSheetVisible(true);
+    }, [setIsBottomSheetVisible]);
+
     const addToPlaylist = async () => {
         return;
     };
@@ -125,18 +144,14 @@ const MusicCard = ({ item, activeSongId, setIsBottomSheetVisible }) => {
                         >
                             <Text style={styles.artist}>{artistNames}</Text>
                         </Marquee>
-                        <Pressable
-                            onPress={() => setIsBottomSheetVisible(true)}
-                        >
+                        <Pressable onPress={handleBottomSheetVisible}>
                             <DotsThree weight="bold" color="white" size={36} />
                         </Pressable>
                     </View>
                 ) : (
                     <View style={styles.shareAndArtist}>
                         <Text style={styles.artist}>{artistNames}</Text>
-                        <Pressable
-                            onPress={() => setIsBottomSheetVisible(true)}
-                        >
+                        <Pressable onPress={handleBottomSheetVisible}>
                             <DotsThree weight="bold" color="white" size={36} />
                         </Pressable>
                     </View>
@@ -162,7 +177,6 @@ const styles = StyleSheet.create({
         height: 603,
         width: "100%",
         borderRadius: 20,
-        marginBottom: 20,
         backgroundColor: "#0c0c0c",
     },
     albumCover: {

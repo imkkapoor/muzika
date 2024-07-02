@@ -132,15 +132,15 @@ const HomeScreen = () => {
 
     useEffect(() => {
         getProfile(); //edit afterwards
-        getTopSongs();
+        if (topSongs.length == 0) {
+            getTopSongs();
+        }
         // sample();
-        // setRecommendations(topSongs);
         // setLoading(false);
     }, []);
 
     useEffect(() => {
         if (topSongs.length > 0) {
-            //edit after
             getRecommendations(topSongs);
         }
     }, [topSongs]);
@@ -152,6 +152,27 @@ const HomeScreen = () => {
             setActiveSongName(viewableItems[0].item.name);
         }
     }, []);
+
+    const renderItem = useCallback(
+        ({ item }) => (
+            <MusicCard
+                item={item}
+                activeSongId={activeSongId}
+                setIsBottomSheetVisible={setIsBottomSheetVisible}
+            />
+        ),
+        [activeSongId, setIsBottomSheetVisible]
+    );
+
+    const keyExtractor = useCallback((item) => item.id, []);
+
+    const itemSeparatorComponent = useCallback(() => {
+        return <View style={{ height: 25.5 }}></View>;
+    });
+
+    const onEndReached = () => {
+        console.log("end is reached");
+    };
 
     if (loading) {
         return (
@@ -213,23 +234,18 @@ const HomeScreen = () => {
                 <GestureHandlerRootView style={styles}>
                     <FlatList
                         data={recommendations}
-                        keyExtractor={(item) => item.id}
+                        keyExtractor={keyExtractor}
                         ref={flatListRef}
                         onViewableItemsChanged={onViewableItemsChanged}
                         showsVerticalScrollIndicator={false}
-                        viewabilityConfig={{
-                            itemVisiblePercentThreshold: 70,
-                        }}
-                        renderItem={({ item }) => (
-                            <MusicCard
-                                item={item}
-                                activeSongId={activeSongId}
-                                setIsBottomSheetVisible={
-                                    setIsBottomSheetVisible
-                                }
-                            />
-                        )}
+                        viewabilityConfig={{ itemVisiblePercentThreshold: 70 }}
+                        renderItem={renderItem}
                         contentContainerStyle={{ paddingBottom: 150 }}
+                        ItemSeparatorComponent={itemSeparatorComponent}
+                        onEndReached={onEndReached}
+                        snapToInterval={628.5}
+                        snapToAlignment="start"
+                        decelerationRate="fast"
                     />
                     <CoustomBottomSheet
                         isVisible={isBottomSheetVisible}
