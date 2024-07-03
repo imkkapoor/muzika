@@ -25,37 +25,19 @@ const HomeScreen = () => {
     const [activeSongId, setActiveSongId] = useState(null);
     const [activeSongShareUrl, setActiveSongShareUrl] = useState(null);
     const [activeSongName, setActiveSongName] = useState(null);
-
+    const numberOfTracksToBeFetched = 20;
     const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
 
     const getProfile = async () => {
-        accessToken = await AsyncStorage.getItem("token");
-        if (!(await AsyncStorage.getItem("userProfile"))) {
-            try {
-                const response = await fetch("https://api.spotify.com/v1/me", {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`,
-                    },
-                });
-                const data = await response.json();
-                setUserProfile(data);
-                await AsyncStorage.setItem("userProfile", JSON.stringify(data));
-            } catch (err) {
-                console.log(err.message);
-            }
-        } else {
-            try {
-                const userProfileString = await AsyncStorage.getItem(
-                    "userProfile"
-                );
+        try {
+            const userProfileString = await AsyncStorage.getItem("userProfile");
 
-                if (userProfileString) {
-                    const userProfile = JSON.parse(userProfileString);
-                    setUserProfile(userProfile);
-                }
-            } catch (error) {
-                console.error("Error parsing JSON string:", error);
+            if (userProfileString) {
+                const userProfile = JSON.parse(userProfileString);
+                setUserProfile(userProfile);
             }
+        } catch (error) {
+            console.error("Error parsing JSON string:", error);
         }
     };
 
@@ -89,7 +71,7 @@ const HomeScreen = () => {
 
         if (tracks.length > 0) {
             const seedTracks = tracks.map((track) => track.id).join(",");
-            const url = `https://api.spotify.com/v1/recommendations?seed_tracks=${seedTracks}&limit=50`;
+            const url = `https://api.spotify.com/v1/recommendations?seed_tracks=${seedTracks}&limit=${numberOfTracksToBeFetched}`;
 
             try {
                 const response = await fetch(url, {
@@ -107,10 +89,28 @@ const HomeScreen = () => {
                 const playableTracks = data.tracks.filter(
                     (track) => track.preview_url
                 );
-                setActiveSongId(playableTracks[0].id);
-                setActiveSongShareUrl(playableTracks[0].external_urls.spotify);
-                setActiveSongName(playableTracks[0].name);
-                setRecommendations(playableTracks);
+
+                setRecommendations((prevRecommendations) => {
+                    const uniqueTracks = playableTracks.filter(
+                        (track) =>
+                            !prevRecommendations.some(
+                                (prevTrack) => prevTrack.id === track.id
+                            )
+                    );
+
+                    if (
+                        prevRecommendations.length === 0 &&
+                        playableTracks.length > 0
+                    ) {
+                        setActiveSongId(playableTracks[0].id);
+                        setActiveSongShareUrl(
+                            playableTracks[0].external_urls.spotify
+                        );
+                        setActiveSongName(playableTracks[0].name);
+                    }
+
+                    return [...prevRecommendations, ...uniqueTracks];
+                });
             } catch (err) {
                 console.log(err);
                 setError(err.message);
@@ -171,7 +171,17 @@ const HomeScreen = () => {
     });
 
     const onEndReached = () => {
-        console.log("end is reached");
+        getRecommendations(topSongs);
+    };
+
+    const listFooterComponent = () => {
+        return (
+            <ActivityIndicator
+                size="small"
+                color="white"
+                style={{ marginTop: 25.5, marginBottom: 30 }}
+            />
+        );
     };
 
     if (loading) {
@@ -246,6 +256,7 @@ const HomeScreen = () => {
                         snapToInterval={628.5}
                         snapToAlignment="start"
                         decelerationRate="fast"
+                        ListFooterComponent={listFooterComponent}
                     />
                     <CoustomBottomSheet
                         isVisible={isBottomSheetVisible}

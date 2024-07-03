@@ -39,7 +39,6 @@ const LoginScreen = () => {
                 if (currentTime < parseInt(expirationDate)) {
                     //token is still valid
                     navigation.replace("Main");
-                    
                 } else {
                     // token is expired
                     AsyncStorage.removeItem("token");
@@ -71,12 +70,28 @@ const LoginScreen = () => {
         discovery
     );
 
+    const getProfile = async () => {
+        accessToken = await AsyncStorage.getItem("token");
+        try {
+            const response = await fetch("https://api.spotify.com/v1/me", {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+            const data = await response.json();
+            await AsyncStorage.setItem("userProfile", JSON.stringify(data));
+        } catch (err) {
+            console.log(err.message);
+        }
+    };
+
     useEffect(() => {
         if (response?.type === "success") {
             const accessToken = response.authentication.accessToken;
             const currentTime = new Date();
             const expirationDate = currentTime.getTime() + 3600 * 1000;
             AsyncStorage.setItem("token", accessToken);
+            getProfile();
             AsyncStorage.setItem("expirationDate", expirationDate.toString());
             navigation.replace("Main");
         }
