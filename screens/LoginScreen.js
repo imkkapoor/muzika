@@ -18,6 +18,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { CLIENT_ID, REDIRECT_URI } from "@env";
 import { LinearGradient } from "expo-linear-gradient";
+import { db } from "../firebase";
+import {
+    doc,
+    getDoc,
+} from "firebase/firestore";
 
 const discovery = {
     authorizationEndpoint: "https://accounts.spotify.com/authorize",
@@ -80,10 +85,25 @@ const LoginScreen = () => {
             });
             const data = await response.json();
             await AsyncStorage.setItem("userProfile", JSON.stringify(data));
+            if (!(await checkUserExists(data.id))) {
+                navigation.replace("ChoosePlaylist");
+            } else navigation.replace("Main");
         } catch (err) {
             console.log(err.message);
         }
     };
+
+    const checkUserExists = async (spotifyUserId) => {
+        const userDocRef = doc(db, "users", spotifyUserId);
+        try {
+            const userDoc = await getDoc(userDocRef);
+            console.log("User exists:", userDoc.exists());
+            return userDoc.exists(); // true if the user exists, false otherwise
+        } catch (error) {
+            console.error("Error checking user existence:", error);
+            return false;
+        }
+    }
 
     useEffect(() => {
         if (response?.type === "success") {
@@ -91,9 +111,8 @@ const LoginScreen = () => {
             const currentTime = new Date();
             const expirationDate = currentTime.getTime() + 3600 * 1000;
             AsyncStorage.setItem("token", accessToken);
-            getProfile();
             AsyncStorage.setItem("expirationDate", expirationDate.toString());
-            navigation.replace("Main");
+            getProfile();
         }
     }, [response]);
 
