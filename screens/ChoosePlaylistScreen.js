@@ -7,8 +7,8 @@ import {
     Image,
     SafeAreaView,
     StyleSheet,
-    Button,
     Pressable,
+    ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { doc, setDoc } from "firebase/firestore";
@@ -19,6 +19,7 @@ const ChoosePlaylistScreen = () => {
     const navigation = useNavigation();
     const [playlists, setPlaylists] = useState([]);
     const [userProfile, setUserProfile] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         fetchPlaylists();
@@ -42,6 +43,7 @@ const ChoosePlaylistScreen = () => {
                 (playlist) => playlist.owner.id === user.id
             );
             setPlaylists(ownedPlaylists);
+            setIsLoading(false);
         } catch (error) {
             console.error(error);
         }
@@ -58,6 +60,7 @@ const ChoosePlaylistScreen = () => {
         } catch (error) {
             console.error("Error loading user profile:", error);
         }
+        return null;
     };
 
     const storeUserDataInFirestore = async (
@@ -94,7 +97,7 @@ const ChoosePlaylistScreen = () => {
             } else {
                 console.log("User profile is null");
             }
-            navigation.replace("Main");
+            navigation.replace("ChooseGenre");
         } catch (err) {
             console.log("Error in playlist selection:", err);
         }
@@ -106,16 +109,18 @@ const ChoosePlaylistScreen = () => {
 
     const renderItem = useCallback(
         ({ item }) => (
-            <TouchableOpacity onPress={() => selectPlaylist(item.id, item.name)}>
-            <View style={styles.eachPlaylistContainer}>
-                {item.images && item.images.length > 0 && (
-                    <Image
-                        source={{ uri: item.images[0].url }}
-                        style={styles.playlistImage}
-                    />
-                )}
-                <Text style={styles.playlistName}>{item.name}</Text>
-            </View>
+            <TouchableOpacity
+                onPress={() => selectPlaylist(item.id, item.name)}
+            >
+                <View style={styles.eachPlaylistContainer}>
+                    {item.images && item.images.length > 0 && (
+                        <Image
+                            source={{ uri: item.images[0].url }}
+                            style={styles.playlistImage}
+                        />
+                    )}
+                    <Text style={styles.playlistName}>{item.name}</Text>
+                </View>
             </TouchableOpacity>
         ),
         [playlists]
@@ -156,18 +161,23 @@ const ChoosePlaylistScreen = () => {
                         Or choose from an existing playlist
                     </Text>
                 </View>
-
-                <FlatList
-                    data={playlists}
-                    keyExtractor={keyExtractor}
-                    renderItem={renderItem}
-                    contentContainerStyle={{
-                        display: "flex",
-                        alignContent: "center",
-                        justifyContent: "center",
-                    }}
-                    ItemSeparatorComponent={itemSeparatorComponent}
-                />
+                {isLoading ? (
+                    <View style={styles.loading}>
+                        <ActivityIndicator size="small" color="white" />
+                    </View>
+                ) : (
+                    <FlatList
+                        data={playlists}
+                        keyExtractor={keyExtractor}
+                        renderItem={renderItem}
+                        contentContainerStyle={{
+                            display: "flex",
+                            alignContent: "center",
+                            justifyContent: "center",
+                        }}
+                        ItemSeparatorComponent={itemSeparatorComponent}
+                    />
+                )}
             </SafeAreaView>
         </View>
     );
@@ -176,6 +186,12 @@ const ChoosePlaylistScreen = () => {
 export default ChoosePlaylistScreen;
 
 const styles = StyleSheet.create({
+    loading: {
+        backgroundColor: "black",
+        display: "flex",
+        alignContent: "center",
+        justifyContent: "center",
+    },
     container: {
         display: "flex",
         justifyContent: "center",
@@ -194,7 +210,7 @@ const styles = StyleSheet.create({
         marginTop: 12,
     },
     textBox: {
-        width: "90%",
+        width: 340,
     },
     optionOne: {
         fontFamily: "Inter-SemiBold",

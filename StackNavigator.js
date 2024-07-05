@@ -4,6 +4,7 @@ import LoginScreen from "./screens/LoginScreen";
 import HomeScreen from "./screens/HomeScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import ChoosePlaylistScreen from "./screens/ChoosePlaylistScreen";
+import ChooseGenresScreen from "./screens/ChooseGenresScreen";
 
 const Stack = createNativeStackNavigator();
 function Navigation() {
@@ -28,6 +29,11 @@ function Navigation() {
                 <Stack.Screen
                     name="ChoosePlaylist"
                     component={ChoosePlaylistScreen}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="ChooseGenre"
+                    component={ChooseGenresScreen}
                     options={{ headerShown: false }}
                 />
             </Stack.Navigator>
