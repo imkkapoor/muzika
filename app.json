@@ -3,7 +3,7 @@
     "name": "spreel",
     "slug": "spreel",
     "version": "1.0.0",
-    "scheme": "exp://192.168.1.81:8081",
+    "scheme": "exp://192.168.1.66:8081",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",

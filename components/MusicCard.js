@@ -1,16 +1,30 @@
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { Audio } from "expo-av";
 import { Marquee } from "@animatereactnative/marquee";
-import { Play, DotsThree, PlusCircle } from "phosphor-react-native";
+import {
+    Play,
+    DotsThree,
+    PlusCircle,
+    CheckCircle,
+} from "phosphor-react-native";
 import { useFocusEffect } from "@react-navigation/native";
+import LoadingFullScreen from "./LoadingFullScreen";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const MusicCard = ({ item, activeSongId, setIsBottomSheetVisible }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [sound, setSound] = useState(null);
     const artistNames = item.artists.map((artist) => artist.name).join(", ");
+    const [waitingPlaylistAddition, setWaitingPlaylistAddition] =
+        useState(false);
+
+    const [isAdded, setIsAdded] = useState(false);
     const maxTitleLength = 17;
     const maxArtistNameLength = 32;
+    const [positionMillis, setPositionMillis] = useState(0);
 
     useEffect(() => {
         if (activeSongId === item.id) {
@@ -31,6 +45,9 @@ const MusicCard = ({ item, activeSongId, setIsBottomSheetVisible }) => {
     useEffect(() => {
         if (sound) {
             sound.setOnPlaybackStatusUpdate((status) => {
+                if (status.isLoaded) {
+                    setPositionMillis(status.positionMillis);
+                }
                 if (status.didJustFinish) {
                     // If the sound finished playing, restart it
                     sound.stopAsync().then(() => {
@@ -42,15 +59,16 @@ const MusicCard = ({ item, activeSongId, setIsBottomSheetVisible }) => {
         }
     }, [sound]);
 
+    // for stoping when the thing goes out of focus
     useFocusEffect(
         useCallback(() => {
             if (activeSongId === item.id && sound) {
-                playSound(); // Resume playing when screen comes into focus
+                playSound();
                 setIsPlaying(true);
             }
             return () => {
                 if (sound) {
-                    pauseSound(); // Pause when screen loses focus
+                    pauseSound();
                 }
             };
         }, [activeSongId, sound])
@@ -106,66 +124,168 @@ const MusicCard = ({ item, activeSongId, setIsBottomSheetVisible }) => {
         setIsBottomSheetVisible(true);
     }, [setIsBottomSheetVisible]);
 
+    const getPlaylistId = async () => {
+        const userProfileString = await AsyncStorage.getItem("userProfile");
+        const userProfile = JSON.parse(userProfileString);
+        spotifyUserId = userProfile.id;
+        const userDocRef = doc(db, "users", spotifyUserId);
+        try {
+            const userDoc = await getDoc(userDocRef);
+            if (userDoc.exists()) {
+                const playlistId = userDoc.data().playlistId;
+                return playlistId;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error("Error getting playlist ID:", error);
+            return false;
+        }
+    };
+
     const addToPlaylist = async () => {
-        return;
+        setWaitingPlaylistAddition(true);
+        const playlistId = await getPlaylistId();
+        const accessToken = await AsyncStorage.getItem("token");
+
+        if (!accessToken) {
+            console.error("No access token found");
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        uris: [item.uri],
+                    }),
+                }
+            );
+            console.log(response);
+
+            if (!response.ok) {
+                throw new Error("Failed to add track to playlist");
+            }
+
+            const data = await response.json();
+            console.log("Track added to playlist:", data);
+            setIsAdded(true);
+        } catch (error) {
+            console.error("Error adding track to the playlist:", error);
+            Alert.alert("Please try again!");
+        } finally {
+            setWaitingPlaylistAddition(false);
+        }
     };
 
     return (
-        <View style={styles.container}>
-            <Pressable onPress={togglePlayAndPause}>
-                <View style={styles.artworkContainer}>
-                    <Image
-                        style={styles.albumCover}
-                        source={{ uri: item.album.images[0].url }}
-                    />
-                    <View style={styles.iconContainer}>
-                        {!isPlaying && activeSongId === item.id && (
-                            <View style={styles.playButtonBackground}>
-                                <Play weight="fill" color="white" size={36} />
-                            </View>
-                        )}
+        <>
+            <View style={styles.container}>
+                <Pressable onPress={togglePlayAndPause}>
+                    <View style={styles.artworkContainer}>
+                        <Image
+                            style={styles.albumCover}
+                            source={{ uri: item.album.images[0].url }}
+                        />
+                        <View style={styles.iconContainer}>
+                            {!isPlaying && activeSongId === item.id && (
+                                <View style={styles.playButtonBackground}>
+                                    <Play
+                                        weight="fill"
+                                        color="white"
+                                        size={36}
+                                    />
+                                </View>
+                            )}
+                        </View>
                     </View>
-                </View>
-            </Pressable>
-            <View style={styles.infoContainer}>
-                {item.name.length > maxTitleLength ? (
-                    <Marquee speed={0.3} spacing={25} style={{ width: 260 }}>
-                        <Text style={styles.title}>{item.name}</Text>
-                    </Marquee>
-                ) : (
-                    <Text style={styles.title}>{item.name}</Text>
-                )}
-                {artistNames.length > maxArtistNameLength ? (
-                    <View style={styles.shareAndArtist}>
+                </Pressable>
+                <View style={styles.infoContainer}>
+                    {item.name.length > maxTitleLength ? (
                         <Marquee
                             speed={0.3}
-                            spacing={20}
-                            style={{ width: 240, marginRight: 60 }}
+                            spacing={25}
+                            style={{ width: 260 }}
                         >
-                            <Text style={styles.artist}>{artistNames}</Text>
+                            <Text style={styles.title}>{item.name}</Text>
                         </Marquee>
-                        <Pressable onPress={handleBottomSheetVisible}>
-                            <DotsThree weight="bold" color="white" size={36} />
-                        </Pressable>
-                    </View>
-                ) : (
-                    <View style={styles.shareAndArtist}>
-                        <Text style={styles.artist}>{artistNames}</Text>
-                        <Pressable onPress={handleBottomSheetVisible}>
-                            <DotsThree weight="bold" color="white" size={36} />
-                        </Pressable>
-                    </View>
-                )}
-            </View>
-            <View style={styles.commentsAndAdd}>
-                <View style={styles.commentPreview}>
-                    <Text style={styles.comment}>Comments</Text>
+                    ) : (
+                        <Text style={styles.title}>{item.name}</Text>
+                    )}
+                    {artistNames.length > maxArtistNameLength ? (
+                        <View style={styles.shareAndArtist}>
+                            <Marquee
+                                speed={0.3}
+                                spacing={20}
+                                style={{ width: 240, marginRight: 60 }}
+                            >
+                                <Text style={styles.artist}>{artistNames}</Text>
+                            </Marquee>
+                            <Pressable onPress={handleBottomSheetVisible}>
+                                <DotsThree
+                                    weight="bold"
+                                    color="white"
+                                    size={36}
+                                />
+                            </Pressable>
+                        </View>
+                    ) : (
+                        <View style={styles.shareAndArtist}>
+                            <Text style={styles.artist}>{artistNames}</Text>
+                            <Pressable onPress={handleBottomSheetVisible}>
+                                <DotsThree
+                                    weight="bold"
+                                    color="white"
+                                    size={36}
+                                />
+                            </Pressable>
+                        </View>
+                    )}
                 </View>
-                <Pressable onPress={addToPlaylist}>
-                    <PlusCircle color="white" size={37} />
-                </Pressable>
+                <View style={styles.commentsAndAdd}>
+                    <View style={styles.commentPreview}>
+                        <Text style={styles.comment}>Comments</Text>
+                    </View>
+                    {isAdded ? (
+                        <CheckCircle color="#1ED760" size={37} weight="fill" />
+                    ) : (
+                        <Pressable onPress={addToPlaylist}>
+                            <PlusCircle color="white" size={37} />
+                        </Pressable>
+                    )}
+                </View>
+                <View style={styles.progressBar}>
+                    <View
+                        style={{
+                            width: `${((positionMillis / 30000) * 100).toFixed(
+                                2
+                            )}%`, // 30000 milliseconds = 30 seconds
+                            backgroundColor: "#ffffff", // Color for played part
+                            height: 2,
+                            borderRadius: 5,
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                        }}
+                    />
+                </View>
+                <View style={styles.durationContainer}>
+                    <Text style={styles.duration}>
+                        {`0:${
+                            Math.ceil(positionMillis / 1000) < 10 ? "0" : ""
+                        }${Math.ceil(positionMillis / 1000)}`}
+                    </Text>
+                    <Text style={styles.duration}>0:30</Text>
+                </View>
             </View>
-        </View>
+            {waitingPlaylistAddition && <LoadingFullScreen />}
+        </>
     );
 };
 
@@ -187,7 +307,7 @@ const styles = StyleSheet.create({
         marginTop: 25.5,
     },
     infoContainer: {
-        marginTop: 55,
+        marginTop: 51,
         width: 340,
     },
     title: {
@@ -248,5 +368,27 @@ const styles = StyleSheet.create({
         width: 78,
         backgroundColor: "rgba(0,0,0,0.5)",
         borderRadius: 50,
+    },
+    progressBar: {
+        width: 345,
+        height: 2,
+        backgroundColor: "#979797",
+        borderRadius: 5,
+        marginTop: 26,
+        position: "relative",
+    },
+
+    durationContainer: {
+        width: 345,
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        flexDirection: "row",
+    },
+    duration: {
+        marginTop: 5,
+        color: "white",
+        fontSize: 11,
+        fontFamily: "Inter-ExtraLight",
     },
 });

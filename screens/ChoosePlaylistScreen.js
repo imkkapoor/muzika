@@ -9,17 +9,25 @@ import {
     StyleSheet,
     Pressable,
     ActivityIndicator,
+    Modal,
+    TextInput,
+    Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { useNavigation } from "@react-navigation/native";
+import LoadingFullScreen from "../components/LoadingFullScreen";
 
 const ChoosePlaylistScreen = () => {
     const navigation = useNavigation();
     const [playlists, setPlaylists] = useState([]);
     const [userProfile, setUserProfile] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [waitingPlaylistAddition, setWaitingPlaylistAddition] =
+        useState(false);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [newPlaylistName, setNewPlaylistName] = useState("");
 
     useEffect(() => {
         fetchPlaylists();
@@ -82,6 +90,7 @@ const ChoosePlaylistScreen = () => {
     };
 
     const selectPlaylist = async (selectedPlaylistId, playlistName) => {
+        setWaitingPlaylistAddition(true);
         try {
             await AsyncStorage.setItem(
                 "selectedPlaylistId",
@@ -100,11 +109,68 @@ const ChoosePlaylistScreen = () => {
             navigation.replace("ChooseGenre");
         } catch (err) {
             console.log("Error in playlist selection:", err);
+            Alert.alert("Please try again!");
+        } finally {
+            setWaitingPlaylistAddition(false);
         }
     };
 
     const handleCreateNewPlaylist = () => {
         console.log("creation of new playlist is requested");
+        setIsModalVisible(true);
+    };
+
+    const handleModalSubmit = async () => {
+        setIsModalVisible(false);
+        setWaitingPlaylistAddition(true);
+        console.log("New Playlist Name:", newPlaylistName);
+        const newPlaylistId = await createNewPlaylist(newPlaylistName);
+        setNewPlaylistName("");
+        console.log(newPlaylistId);
+        navigation.replace("ChooseGenre");
+    };
+
+    const createNewPlaylist = async (playlistName) => {
+        const accessToken = await AsyncStorage.getItem("token");
+
+        if (!accessToken) {
+            console.error("No access token found");
+            return;
+        }
+
+        try {
+            const userProfileString = await AsyncStorage.getItem("userProfile");
+            const userProfile = JSON.parse(userProfileString);
+            const response = await fetch(
+                `https://api.spotify.com/v1/users/${userProfile.id}/playlists`,
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        name: playlistName,
+                        description: "",
+                        public: false,
+                    }),
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Failed to create playlist");
+            }
+
+            const data = await response.json();
+            console.log("New playlist created:", data);
+            await storeUserDataInFirestore(userProfile, playlistName, data.id);
+            return data.id; // Extract and return the new playlist ID
+        } catch (error) {
+            console.error("Error creating playlist:", error);
+            Alert.alert("Please try again!");
+        } finally {
+            setWaitingPlaylistAddition(false);
+        }
     };
 
     const renderItem = useCallback(
@@ -178,7 +244,53 @@ const ChoosePlaylistScreen = () => {
                         ItemSeparatorComponent={itemSeparatorComponent}
                     />
                 )}
+
+                <Modal
+                    transparent={true}
+                    animationType="slide"
+                    visible={isModalVisible}
+                    onRequestClose={() => setIsModalVisible(false)}
+                >
+                    <View style={styles.modalBackground}>
+                        <View style={styles.modalContainer}>
+                            <Text style={styles.modalTitle}>
+                                Create New Playlist
+                            </Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Enter playlist name"
+                                placeholderTextColor="#888"
+                                value={newPlaylistName}
+                                onChangeText={setNewPlaylistName}
+                            />
+                            <View style={styles.buttonContainer}>
+                                <Pressable
+                                    onPress={() => setIsModalVisible(false)}
+                                    style={[
+                                        styles.buttonBox,
+                                        styles.firstButtonBox,
+                                    ]}
+                                >
+                                    <Text style={styles.buttonText}>
+                                        Cancel
+                                    </Text>
+                                </Pressable>
+                                <Pressable
+                                    onPress={handleModalSubmit}
+                                    style={styles.buttonBox}
+                                >
+                                    <Text style={styles.buttonText}>
+                                        Submit
+                                    </Text>
+                                </Pressable>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
             </SafeAreaView>
+            {waitingPlaylistAddition && (
+                <LoadingFullScreen/>
+            )}
         </View>
     );
 };
@@ -256,5 +368,60 @@ const styles = StyleSheet.create({
         fontFamily: "Inter-Medium",
         fontSize: 15,
         width: 262,
+    },
+    modalBackground: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    modalContainer: {
+        width: 300,
+        paddingTop: 20,
+        backgroundColor: "rgba(33,33,35,1)",
+        borderRadius: 20,
+        alignItems: "center",
+    },
+    modalTitle: {
+        fontSize: 17,
+        fontFamily: "Inter-SemiBold",
+        marginBottom: 15,
+        color: "white",
+    },
+    input: {
+        width: "100%",
+        padding: 12,
+        borderWidth: 1,
+        borderColor: "#414043",
+        borderRadius: 5,
+        marginBottom: 20,
+        fontFamily: "Inter",
+        color: "white",
+        width: "85%",
+        fontSize: 15,
+    },
+
+    buttonContainer: {
+        display: "flex",
+        width: "100%",
+        flexDirection: "row",
+        justifyContent: "space-evenly",
+    },
+    buttonBox: {
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        flex: 1,
+        borderTopWidth: 1,
+        paddingTop: 15,
+        paddingBottom: 15,
+        borderColor: "#2a292b",
+    },
+    buttonText: {
+        color: "#0a84ff",
+        fontSize: 16,
+    },
+    firstButtonBox: {
+        borderRightWidth: 1,
     },
 });
