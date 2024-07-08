@@ -9,17 +9,19 @@ import {
     CheckCircle,
 } from "phosphor-react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import LoadingFullScreen from "./LoadingFullScreen";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const MusicCard = ({ item, activeSongId, setIsBottomSheetVisible }) => {
+const MusicCard = ({
+    item,
+    activeSongId,
+    setIsBottomSheetVisible,
+    setWaitingPlaylistAddition,
+}) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [sound, setSound] = useState(null);
     const artistNames = item.artists.map((artist) => artist.name).join(", ");
-    const [waitingPlaylistAddition, setWaitingPlaylistAddition] =
-        useState(false);
 
     const [isAdded, setIsAdded] = useState(false);
     const maxTitleLength = 17;
@@ -124,9 +126,7 @@ const MusicCard = ({ item, activeSongId, setIsBottomSheetVisible }) => {
         setIsBottomSheetVisible(true);
     }, [setIsBottomSheetVisible]);
 
-    const getPlaylistId = async () => {
-        const userProfileString = await AsyncStorage.getItem("userProfile");
-        const userProfile = JSON.parse(userProfileString);
+    const getPlaylistId = async (userProfile) => {
         spotifyUserId = userProfile.id;
         const userDocRef = doc(db, "users", spotifyUserId);
         try {
@@ -143,9 +143,44 @@ const MusicCard = ({ item, activeSongId, setIsBottomSheetVisible }) => {
         }
     };
 
+    const addSongToRecentAdds = async (userProfile) => {
+        try {
+            const userDocRef = doc(db, "users", userProfile.id);
+            const userDocSnapshot = await getDoc(userDocRef);
+
+            if (userDocSnapshot.exists()) {
+                const userData = userDocSnapshot.data();
+                let recentAdds = userData.recentAdds || [];
+                if (recentAdds.length!=0) {
+                    recentAdds = recentAdds.filter(
+                        (recentItem) => recentItem.itemId !== item.id
+                    );
+                }
+
+                recentAdds.unshift({
+                    itemId: item.id
+                });
+
+                if (recentAdds.length > 3) {
+                    recentAdds.pop();
+                }
+
+                await updateDoc(userDocRef, {
+                    recentAdds: recentAdds,
+                });
+            } else {
+                console.log("No such user document!");
+            }
+        } catch (err) {
+            console.error("Error in adding to recent adds:", err);
+        }
+    };
+
     const addToPlaylist = async () => {
         setWaitingPlaylistAddition(true);
-        const playlistId = await getPlaylistId();
+        const userProfileString = await AsyncStorage.getItem("userProfile");
+        const userProfile = JSON.parse(userProfileString);
+        const playlistId = await getPlaylistId(userProfile);
         const accessToken = await AsyncStorage.getItem("token");
 
         if (!accessToken) {
@@ -175,6 +210,7 @@ const MusicCard = ({ item, activeSongId, setIsBottomSheetVisible }) => {
 
             const data = await response.json();
             console.log("Track added to playlist:", data);
+            addSongToRecentAdds(userProfile);
             setIsAdded(true);
         } catch (error) {
             console.error("Error adding track to the playlist:", error);
@@ -185,107 +221,85 @@ const MusicCard = ({ item, activeSongId, setIsBottomSheetVisible }) => {
     };
 
     return (
-        <>
-            <View style={styles.container}>
-                <Pressable onPress={togglePlayAndPause}>
-                    <View style={styles.artworkContainer}>
-                        <Image
-                            style={styles.albumCover}
-                            source={{ uri: item.album.images[0].url }}
-                        />
-                        <View style={styles.iconContainer}>
-                            {!isPlaying && activeSongId === item.id && (
-                                <View style={styles.playButtonBackground}>
-                                    <Play
-                                        weight="fill"
-                                        color="white"
-                                        size={36}
-                                    />
-                                </View>
-                            )}
-                        </View>
+        <View style={styles.container}>
+            <Pressable onPress={togglePlayAndPause}>
+                <View style={styles.artworkContainer}>
+                    <Image
+                        style={styles.albumCover}
+                        source={{ uri: item.album.images[0].url }}
+                    />
+                    <View style={styles.iconContainer}>
+                        {!isPlaying && activeSongId === item.id && (
+                            <View style={styles.playButtonBackground}>
+                                <Play weight="fill" color="white" size={36} />
+                            </View>
+                        )}
                     </View>
-                </Pressable>
-                <View style={styles.infoContainer}>
-                    {item.name.length > maxTitleLength ? (
+                </View>
+            </Pressable>
+            <View style={styles.infoContainer}>
+                {item.name.length > maxTitleLength ? (
+                    <Marquee speed={0.3} spacing={25} style={{ width: 260 }}>
+                        <Text style={styles.title}>{item.name}</Text>
+                    </Marquee>
+                ) : (
+                    <Text style={styles.title}>{item.name}</Text>
+                )}
+                {artistNames.length > maxArtistNameLength ? (
+                    <View style={styles.shareAndArtist}>
                         <Marquee
                             speed={0.3}
-                            spacing={25}
-                            style={{ width: 260 }}
+                            spacing={20}
+                            style={{ width: 240, marginRight: 60 }}
                         >
-                            <Text style={styles.title}>{item.name}</Text>
-                        </Marquee>
-                    ) : (
-                        <Text style={styles.title}>{item.name}</Text>
-                    )}
-                    {artistNames.length > maxArtistNameLength ? (
-                        <View style={styles.shareAndArtist}>
-                            <Marquee
-                                speed={0.3}
-                                spacing={20}
-                                style={{ width: 240, marginRight: 60 }}
-                            >
-                                <Text style={styles.artist}>{artistNames}</Text>
-                            </Marquee>
-                            <Pressable onPress={handleBottomSheetVisible}>
-                                <DotsThree
-                                    weight="bold"
-                                    color="white"
-                                    size={36}
-                                />
-                            </Pressable>
-                        </View>
-                    ) : (
-                        <View style={styles.shareAndArtist}>
                             <Text style={styles.artist}>{artistNames}</Text>
-                            <Pressable onPress={handleBottomSheetVisible}>
-                                <DotsThree
-                                    weight="bold"
-                                    color="white"
-                                    size={36}
-                                />
-                            </Pressable>
-                        </View>
-                    )}
-                </View>
-                <View style={styles.commentsAndAdd}>
-                    <View style={styles.commentPreview}>
-                        <Text style={styles.comment}>Comments</Text>
-                    </View>
-                    {isAdded ? (
-                        <CheckCircle color="#1ED760" size={37} weight="fill" />
-                    ) : (
-                        <Pressable onPress={addToPlaylist}>
-                            <PlusCircle color="white" size={37} />
+                        </Marquee>
+                        <Pressable onPress={handleBottomSheetVisible}>
+                            <DotsThree weight="bold" color="white" size={36} />
                         </Pressable>
-                    )}
+                    </View>
+                ) : (
+                    <View style={styles.shareAndArtist}>
+                        <Text style={styles.artist}>{artistNames}</Text>
+                        <Pressable onPress={handleBottomSheetVisible}>
+                            <DotsThree weight="bold" color="white" size={36} />
+                        </Pressable>
+                    </View>
+                )}
+            </View>
+            <View style={styles.commentsAndAdd}>
+                <View style={styles.commentPreview}>
+                    <Text style={styles.comment}>Comments</Text>
                 </View>
-                <View style={styles.progressBar}>
-                    <View
-                        style={{
+                {isAdded ? (
+                    <CheckCircle color="#1ED760" size={37} weight="fill" />
+                ) : (
+                    <Pressable onPress={addToPlaylist}>
+                        <PlusCircle color="white" size={37} />
+                    </Pressable>
+                )}
+            </View>
+            <View style={styles.progressBar}>
+                <View
+                    style={[
+                        {
                             width: `${((positionMillis / 30000) * 100).toFixed(
                                 2
                             )}%`, // 30000 milliseconds = 30 seconds
-                            backgroundColor: "#ffffff", // Color for played part
-                            height: 2,
-                            borderRadius: 5,
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                        }}
-                    />
-                </View>
-                <View style={styles.durationContainer}>
-                    <Text style={styles.duration}>
-                        {`0:${
-                            Math.ceil(positionMillis / 1000) < 10 ? "0" : ""
-                        }${Math.ceil(positionMillis / 1000)}`}
-                    </Text>
-                    <Text style={styles.duration}>0:30</Text>
-                </View>
+                        },
+                        styles.progressMade,
+                    ]}
+                />
             </View>
-            {waitingPlaylistAddition && <LoadingFullScreen />}
-        </>
+            <View style={styles.durationContainer}>
+                <Text style={styles.duration}>
+                    {`0:${
+                        Math.ceil(positionMillis / 1000) < 10 ? "0" : ""
+                    }${Math.ceil(positionMillis / 1000)}`}
+                </Text>
+                <Text style={styles.duration}>0:30</Text>
+            </View>
+        </View>
     );
 };
 
@@ -343,7 +357,6 @@ const styles = StyleSheet.create({
         left: "50%",
         transform: [{ translateX: -18 }, { translateY: -36 }],
     },
-
     shareAndArtist: {
         display: "flex",
         flexDirection: "row",
@@ -377,7 +390,14 @@ const styles = StyleSheet.create({
         marginTop: 26,
         position: "relative",
     },
-
+    progressMade: {
+        backgroundColor: "#ffffff",
+        height: 2,
+        borderRadius: 5,
+        position: "absolute",
+        top: 0,
+        left: 0,
+    },
     durationContainer: {
         width: 345,
         display: "flex",

@@ -6,6 +6,7 @@ import {
     Pressable,
     ActivityIndicator,
     FlatList,
+    Image,
 } from "react-native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -13,6 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import MusicCard from "../components/MusicCard";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import CoustomBottomSheet from "../components/CoustomBottomSheet";
+import LoadingFullScreen from "../components/LoadingFullScreen";
 
 const HomeScreen = () => {
     const navigation = useNavigation();
@@ -27,6 +29,8 @@ const HomeScreen = () => {
     const [activeSongName, setActiveSongName] = useState(null);
     const numberOfTracksToBeFetched = 20;
     const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
+    const [waitingPlaylistAddition, setWaitingPlaylistAddition] =
+        useState(false);
 
     const getProfile = async () => {
         try {
@@ -120,23 +124,11 @@ const HomeScreen = () => {
         }
     };
 
-    // delete after
-    const sample = async () => {
-        const data = await AsyncStorage.getItem("sampleSongs");
-
-        if (data) {
-            const sampleSongs = JSON.parse(data);
-            setRecommendations(sampleSongs);
-        }
-    };
-
     useEffect(() => {
-        getProfile(); //edit afterwards
+        getProfile();
         if (topSongs.length == 0) {
             getTopSongs();
         }
-        // sample();
-        // setLoading(false);
     }, []);
 
     useEffect(() => {
@@ -159,6 +151,7 @@ const HomeScreen = () => {
                 item={item}
                 activeSongId={activeSongId}
                 setIsBottomSheetVisible={setIsBottomSheetVisible}
+                setWaitingPlaylistAddition={setWaitingPlaylistAddition}
             />
         ),
         [activeSongId, setIsBottomSheetVisible]
@@ -216,28 +209,33 @@ const HomeScreen = () => {
             }}
         >
             <SafeAreaView>
-                <View
-                    style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        height: 69,
-                    }}
-                >
-                    <Text style={{ color: "white" }}>Spreel</Text>
-                    <Pressable
+                <View style={styles.navBar}>
+                    <Text
+                        style={{
+                            color: "white",
+                            fontFamily: "Inter-SemiBold",
+                            // fontFamily: "Flowrise-Regular",
+                            fontSize: 20,
+                        }}
+                    >
+                        /música
+                    </Text>
+                    {/* <Pressable
                         onPress={() => {
                             navigation.navigate("ChoosePlaylist");
                         }}
                     >
                         <Text style={{ color: "white" }}>Choose Playlist</Text>
-                    </Pressable>
+                    </Pressable> */}
                     <Pressable
                         onPress={() => {
                             navigation.navigate("Profile");
                         }}
                     >
-                        <Text style={{ color: "white" }}>Profile</Text>
+                        <Image
+                            source={{ uri: userProfile?.images[1].url }}
+                            style={{ height: 33, width: 33, borderRadius: 100 }}
+                        ></Image>
                     </Pressable>
                 </View>
 
@@ -266,6 +264,7 @@ const HomeScreen = () => {
                     />
                 </GestureHandlerRootView>
             </SafeAreaView>
+            {waitingPlaylistAddition && <LoadingFullScreen />}
         </View>
     );
 };
@@ -273,11 +272,28 @@ const HomeScreen = () => {
 export default HomeScreen;
 
 const styles = StyleSheet.create({
+    navBar: {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        height: 69,
+        width: "88%",
+        alignContent: "center",
+        alignItems: "center",
+        alignSelf: "center",
+    },
     loading: {
         backgroundColor: "black",
         display: "flex",
         alignContent: "center",
         justifyContent: "center",
         height: "100%",
+    },
+    bottomGradient: {
+        flex: 1,
+        height: 40,
+        position: "absolute",
+        bottom: 0,
+        width: "100%",
     },
 });
