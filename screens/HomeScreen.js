@@ -15,6 +15,8 @@ import MusicCard from "../components/MusicCard";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import CoustomBottomSheet from "../components/CoustomBottomSheet";
 import LoadingFullScreen from "../components/LoadingFullScreen";
+import { getPLaylistSpecificTracks } from "../functions/spotify";
+import { getPlaylistId } from "../functions/dbFunctions";
 
 const HomeScreen = () => {
     const navigation = useNavigation();
@@ -31,6 +33,7 @@ const HomeScreen = () => {
     const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
     const [waitingPlaylistAddition, setWaitingPlaylistAddition] =
         useState(false);
+    const [alreadyPresentTrackIds, setAlreadyPresentTrackIds] = useState([]);
 
     const getProfile = async () => {
         try {
@@ -70,6 +73,25 @@ const HomeScreen = () => {
         }
     };
 
+    const getAlreadyPresentTrackIds = async () => {
+        const playlistId = await getPlaylistId(userProfile);
+        const alreadyPresentTracks = await getPLaylistSpecificTracks(
+            playlistId
+        );
+        const alreadyPresentTrackIds = alreadyPresentTracks.items.map(
+            (item) => item.track.id
+        );
+        setAlreadyPresentTrackIds(alreadyPresentTrackIds);
+    };
+
+    const filterTracks = async (data) => {
+        const playableTracks = data.tracks.filter(
+            (track) =>
+                track.preview_url && !alreadyPresentTrackIds.includes(track.id)
+        );
+        return playableTracks;
+    };
+
     const getRecommendations = async (tracks) => {
         accessToken = await AsyncStorage.getItem("token");
 
@@ -90,9 +112,8 @@ const HomeScreen = () => {
                 }
 
                 const data = await response.json();
-                const playableTracks = data.tracks.filter(
-                    (track) => track.preview_url
-                );
+
+                const playableTracks = await filterTracks(data);
 
                 setRecommendations((prevRecommendations) => {
                     const uniqueTracks = playableTracks.filter(
@@ -125,17 +146,24 @@ const HomeScreen = () => {
     };
 
     useEffect(() => {
-        getProfile();
-        if (topSongs.length == 0) {
-            getTopSongs();
-        }
+        const fetchData = async () => {
+            await getProfile();
+        };
+        fetchData();
     }, []);
 
     useEffect(() => {
-        if (topSongs.length > 0) {
+        if (userProfile) {
+            getAlreadyPresentTrackIds();
+            getTopSongs();
+        }
+    }, [userProfile]);
+
+    useEffect(() => {
+        if (topSongs.length > 0 && alreadyPresentTrackIds.length >= 0) {
             getRecommendations(topSongs);
         }
-    }, [topSongs]);
+    }, [topSongs, alreadyPresentTrackIds]);
 
     const onViewableItemsChanged = useCallback(({ viewableItems }) => {
         if (viewableItems.length > 0 && viewableItems[0].isViewable) {
@@ -214,7 +242,6 @@ const HomeScreen = () => {
                         style={{
                             color: "white",
                             fontFamily: "Inter-SemiBold",
-                            // fontFamily: "Flowrise-Regular",
                             fontSize: 20,
                         }}
                     >

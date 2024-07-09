@@ -12,6 +12,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getPlaylistId } from "../functions/dbFunctions";
 
 const MusicCard = ({
     item,
@@ -126,22 +127,22 @@ const MusicCard = ({
         setIsBottomSheetVisible(true);
     }, [setIsBottomSheetVisible]);
 
-    const getPlaylistId = async (userProfile) => {
-        spotifyUserId = userProfile.id;
-        const userDocRef = doc(db, "users", spotifyUserId);
-        try {
-            const userDoc = await getDoc(userDocRef);
-            if (userDoc.exists()) {
-                const playlistId = userDoc.data().playlistId;
-                return playlistId;
-            } else {
-                return null;
-            }
-        } catch (error) {
-            console.error("Error getting playlist ID:", error);
-            return false;
-        }
-    };
+    // const getPlaylistId = async (userProfile) => {
+    //     spotifyUserId = userProfile.id;
+    //     const userDocRef = doc(db, "users", spotifyUserId);
+    //     try {
+    //         const userDoc = await getDoc(userDocRef);
+    //         if (userDoc.exists()) {
+    //             const playlistId = userDoc.data().playlistId;
+    //             return playlistId;
+    //         } else {
+    //             return null;
+    //         }
+    //     } catch (error) {
+    //         console.error("Error getting playlist ID:", error);
+    //         return false;
+    //     }
+    // };
 
     const addSongToRecentAdds = async (userProfile) => {
         try {
@@ -151,17 +152,17 @@ const MusicCard = ({
             if (userDocSnapshot.exists()) {
                 const userData = userDocSnapshot.data();
                 let recentAdds = userData.recentAdds || [];
-                if (recentAdds.length!=0) {
+                if (recentAdds.length != 0) {
                     recentAdds = recentAdds.filter(
                         (recentItem) => recentItem.itemId !== item.id
                     );
                 }
 
                 recentAdds.unshift({
-                    itemId: item.id
+                    itemId: item.id,
                 });
 
-                if (recentAdds.length > 3) {
+                if (recentAdds.length > 5) {
                     recentAdds.pop();
                 }
 
