@@ -88,7 +88,6 @@ const MusicCard = ({
     };
 
     const playSound = useCallback(async () => {
-
         try {
             if (sound !== null) {
                 await sound.playAsync();
@@ -188,7 +187,6 @@ const MusicCard = ({
                     }),
                 }
             );
-            console.log(response);
 
             if (!response.ok) {
                 throw new Error("Failed to add track to playlist");
@@ -208,8 +206,6 @@ const MusicCard = ({
 
     return (
         <View style={styles.container}>
-            {/* {console.log(activeSongId)}
-            {console.log("heredsadsf")} */}
             <Pressable onPress={togglePlayAndPause}>
                 <View style={styles.artworkContainer}>
                     <Image

@@ -81,7 +81,7 @@ const HomeScreen = () => {
         const alreadyPresentTracksIds = await getPLaylistSpecificTracks(
             playlistId
         );
-        console.log(alreadyPresentTrackIds)
+        // console.log(alreadyPresentTrackIds);
         setAlreadyPresentTrackIds(alreadyPresentTracksIds);
     };
 
@@ -171,7 +171,10 @@ const HomeScreen = () => {
     }, [userProfile]);
 
     useEffect(() => {
-        if (topSongs.length > 0 && alreadyPresentTrackIds.length >= 0) {
+        if (
+            topSongs.length > 0 &&
+            (alreadyPresentTrackIds.length > 0 || alreadyPresentTrackIds === -1)
+        ) {
             getRecommendations(topSongs);
         }
     }, [topSongs, alreadyPresentTrackIds]);
