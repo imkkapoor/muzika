@@ -49,23 +49,6 @@ const MusicCard = ({
         }
     }, [activeSongId]);
 
-    useEffect(() => {
-        if (sound) {
-            sound.setOnPlaybackStatusUpdate((status) => {
-                if (status.isLoaded) {
-                    setPositionMillis(status.positionMillis);
-                }
-                if (status.didJustFinish) {
-                    // If the sound finished playing, restart it
-                    sound.stopAsync().then(() => {
-                        sound.setPositionAsync(0);
-                        playSound();
-                    });
-                }
-            });
-        }
-    }, [sound]);
-
     // for stoping when the thing goes out of focus
     useFocusEffect(
         useCallback(() => {
@@ -83,9 +66,14 @@ const MusicCard = ({
 
     const loadAndPlaySound = useCallback(async () => {
         try {
-            const { sound: newSound } = await Audio.Sound.createAsync({
-                uri: item.preview_url,
-            });
+            const { sound: newSound, status } = await Audio.Sound.createAsync(
+                {
+                    uri: item.preview_url,
+                },
+                { shouldPlay: true, isLooping: true },
+                onPlaybackStatusUpdate
+            );
+            onPlaybackStatusUpdate(status);
             setSound(newSound);
             await newSound.playAsync();
         } catch (error) {
@@ -93,7 +81,14 @@ const MusicCard = ({
         }
     }, [item.preview_url]);
 
+    const onPlaybackStatusUpdate = async (status) => {
+        if (status.isLoaded && status.isPlaying) {
+            setPositionMillis(status.positionMillis);
+        }
+    };
+
     const playSound = useCallback(async () => {
+
         try {
             if (sound !== null) {
                 await sound.playAsync();
@@ -213,6 +208,8 @@ const MusicCard = ({
 
     return (
         <View style={styles.container}>
+            {/* {console.log(activeSongId)}
+            {console.log("heredsadsf")} */}
             <Pressable onPress={togglePlayAndPause}>
                 <View style={styles.artworkContainer}>
                     <Image
