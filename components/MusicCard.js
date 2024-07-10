@@ -1,5 +1,5 @@
 import { Alert, Image, Pressable, StyleSheet, Text, View } from "react-native";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { memo, useCallback, useEffect, useState } from "react";
 import { Audio } from "expo-av";
 import { Marquee } from "@animatereactnative/marquee";
 import {
@@ -11,14 +11,18 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getPlaylistId } from "../functions/dbFunctions";
+import {
+    getAccessToken,
+    getUserProfile,
+} from "../functions/localStorageFunctions";
 
 const MusicCard = ({
     item,
     activeSongId,
     setIsBottomSheetVisible,
     setWaitingPlaylistAddition,
+    setIsCommentSectionVisible,
 }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [sound, setSound] = useState(null);
@@ -77,7 +81,7 @@ const MusicCard = ({
         }, [activeSongId, sound])
     );
 
-    const loadAndPlaySound = async () => {
+    const loadAndPlaySound = useCallback(async () => {
         try {
             const { sound: newSound } = await Audio.Sound.createAsync({
                 uri: item.preview_url,
@@ -87,9 +91,9 @@ const MusicCard = ({
         } catch (error) {
             console.error("Error playing sound:", error);
         }
-    };
+    }, [item.preview_url]);
 
-    const playSound = async () => {
+    const playSound = useCallback(async () => {
         try {
             if (sound !== null) {
                 await sound.playAsync();
@@ -97,9 +101,9 @@ const MusicCard = ({
         } catch (error) {
             console.error("Error playing sound:", error);
         }
-    };
+    }, [sound]);
 
-    const pauseSound = async () => {
+    const pauseSound = useCallback(async () => {
         try {
             if (sound !== null) {
                 await sound.pauseAsync();
@@ -107,9 +111,9 @@ const MusicCard = ({
         } catch (error) {
             console.error("Error pausing sound:", error);
         }
-    };
+    }, [sound]);
 
-    const togglePlayAndPause = async () => {
+    const togglePlayAndPause = useCallback(async () => {
         try {
             if (!isPlaying) {
                 playSound();
@@ -121,28 +125,15 @@ const MusicCard = ({
         } catch (error) {
             console.error("Error toggling play and pausing:", error);
         }
-    };
+    }, [isPlaying, playSound, pauseSound]);
 
     const handleBottomSheetVisible = useCallback(() => {
         setIsBottomSheetVisible(true);
     }, [setIsBottomSheetVisible]);
 
-    // const getPlaylistId = async (userProfile) => {
-    //     spotifyUserId = userProfile.id;
-    //     const userDocRef = doc(db, "users", spotifyUserId);
-    //     try {
-    //         const userDoc = await getDoc(userDocRef);
-    //         if (userDoc.exists()) {
-    //             const playlistId = userDoc.data().playlistId;
-    //             return playlistId;
-    //         } else {
-    //             return null;
-    //         }
-    //     } catch (error) {
-    //         console.error("Error getting playlist ID:", error);
-    //         return false;
-    //     }
-    // };
+    const handleCommmentsVisibility = useCallback(() => {
+        setIsCommentSectionVisible(true);
+    }, [setIsCommentSectionVisible]);
 
     const addSongToRecentAdds = async (userProfile) => {
         try {
@@ -179,10 +170,9 @@ const MusicCard = ({
 
     const addToPlaylist = async () => {
         setWaitingPlaylistAddition(true);
-        const userProfileString = await AsyncStorage.getItem("userProfile");
-        const userProfile = JSON.parse(userProfileString);
+        const userProfile = await getUserProfile();
         const playlistId = await getPlaylistId(userProfile);
-        const accessToken = await AsyncStorage.getItem("token");
+        const accessToken = await getAccessToken();
 
         if (!accessToken) {
             console.error("No access token found");
@@ -269,9 +259,12 @@ const MusicCard = ({
                 )}
             </View>
             <View style={styles.commentsAndAdd}>
-                <View style={styles.commentPreview}>
+                <Pressable
+                    style={styles.commentPreview}
+                    onPress={handleCommmentsVisibility}
+                >
                     <Text style={styles.comment}>Comments</Text>
-                </View>
+                </Pressable>
                 {isAdded ? (
                     <CheckCircle color="#1ED760" size={37} weight="fill" />
                 ) : (
@@ -304,7 +297,7 @@ const MusicCard = ({
     );
 };
 
-export default MusicCard;
+export default memo(MusicCard);
 
 const styles = StyleSheet.create({
     container: {

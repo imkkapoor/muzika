@@ -18,4 +18,16 @@ const getPlaylistId = async (userProfile) => {
     }
 };
 
-export { getPlaylistId };
+const checkUserExists = async (spotifyUserId) => {
+    const userDocRef = doc(db, "users", spotifyUserId);
+    try {
+        const userDoc = await getDoc(userDocRef);
+        console.log("User exists:", userDoc.exists());
+        return userDoc.exists(); // true if the user exists, false otherwise
+    } catch (error) {
+        console.error("Error checking user existence:", error);
+        return false;
+    }
+}
+
+export { getPlaylistId, checkUserExists };

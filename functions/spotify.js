@@ -1,14 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const getAccessToken = async () => {
-    try {
-        const token = await AsyncStorage.getItem("token");
-        return token;
-    } catch (error) {
-        console.error("Error retrieving access token:", error);
-        return null;
-    }
-};
+import { getAccessToken } from "./localStorageFunctions";
 
 const getTracks = async (tracks) => {
     const accessToken = await getAccessToken();
@@ -63,11 +54,36 @@ const getPLaylistSpecificTracks = async (playlistId) => {
         }
 
         const data = await response.json();
-        return data;
+        if (data.total != 0) {
+            const alreadyPresentTrackIds = data.items.map(
+                (item) => item.track.id
+            );
+            console.log(alreadyPresentTrackIds);
+            return alreadyPresentTrackIds;
+        } else {
+            return -1;
+        }
     } catch (err) {
         console.error("Error fetching tracks:", err);
         return [];
     }
 };
 
-export { getTracks, getPLaylistSpecificTracks};
+const getProfile = async () => {
+    const accessToken = await getAccessToken();
+
+    try {
+        const response = await fetch("https://api.spotify.com/v1/me", {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        });
+        const data = await response.json();
+        await AsyncStorage.setItem("userProfile", JSON.stringify(data));
+        return data;
+    } catch (err) {
+        console.error("Error getting user deatils:", err);
+    }
+};
+
+export { getTracks, getPLaylistSpecificTracks, getProfile };

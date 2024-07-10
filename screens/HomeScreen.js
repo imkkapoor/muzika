@@ -13,10 +13,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import MusicCard from "../components/MusicCard";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import CoustomBottomSheet from "../components/CoustomBottomSheet";
+import ShareBottomSheet from "../components/ShareBottomSheet";
 import LoadingFullScreen from "../components/LoadingFullScreen";
 import { getPLaylistSpecificTracks } from "../functions/spotify";
 import { getPlaylistId } from "../functions/dbFunctions";
+import {
+    getAccessToken,
+    getUserProfile,
+} from "../functions/localStorageFunctions";
+import CommentsBottomSheet from "../components/CommentsBottomSheet";
 
 const HomeScreen = () => {
     const navigation = useNavigation();
@@ -31,25 +36,24 @@ const HomeScreen = () => {
     const [activeSongName, setActiveSongName] = useState(null);
     const numberOfTracksToBeFetched = 20;
     const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
+    const [isCommentSectionVisible, setIsCommentSectionVisible] =
+        useState(false);
+
     const [waitingPlaylistAddition, setWaitingPlaylistAddition] =
         useState(false);
     const [alreadyPresentTrackIds, setAlreadyPresentTrackIds] = useState([]);
 
-    const getProfile = async () => {
+    const setProfile = async () => {
         try {
-            const userProfileString = await AsyncStorage.getItem("userProfile");
-
-            if (userProfileString) {
-                const userProfile = JSON.parse(userProfileString);
-                setUserProfile(userProfile);
-            }
+            const userProfile = await getUserProfile();
+            setUserProfile(userProfile);
         } catch (error) {
             console.error("Error parsing JSON string:", error);
         }
     };
 
     const getTopSongs = async () => {
-        accessToken = await AsyncStorage.getItem("token");
+        const accessToken = await getAccessToken();
         try {
             const response = await fetch(
                 `https://api.spotify.com/v1/me/top/tracks?limit=5`,
@@ -61,27 +65,24 @@ const HomeScreen = () => {
             );
 
             if (!response.ok) {
-                throw new Error("Network response was not ok");
+                throw new Error("Error getiing top songs");
             }
 
             const data = await response.json();
             setTopSongs(data.items);
         } catch (err) {
             console.log(err);
-
             setError(err.message);
         }
     };
 
     const getAlreadyPresentTrackIds = async () => {
         const playlistId = await getPlaylistId(userProfile);
-        const alreadyPresentTracks = await getPLaylistSpecificTracks(
+        const alreadyPresentTracksIds = await getPLaylistSpecificTracks(
             playlistId
         );
-        const alreadyPresentTrackIds = alreadyPresentTracks.items.map(
-            (item) => item.track.id
-        );
-        setAlreadyPresentTrackIds(alreadyPresentTrackIds);
+        console.log(alreadyPresentTrackIds)
+        setAlreadyPresentTrackIds(alreadyPresentTracksIds);
     };
 
     const filterTracks = async (data) => {
@@ -93,7 +94,7 @@ const HomeScreen = () => {
     };
 
     const getRecommendations = async (tracks) => {
-        accessToken = await AsyncStorage.getItem("token");
+        const accessToken = await getAccessToken();
 
         if (tracks.length > 0) {
             const seedTracks = tracks.map((track) => track.id).join(",");
@@ -105,10 +106,9 @@ const HomeScreen = () => {
                         Authorization: `Bearer ${accessToken}`,
                     },
                 });
-
                 if (!response.ok) {
                     console.log(response);
-                    throw new Error("Network response was not ok");
+                    throw new Error("Error getting recommendations");
                 }
 
                 const data = await response.json();
@@ -133,7 +133,6 @@ const HomeScreen = () => {
                         );
                         setActiveSongName(playableTracks[0].name);
                     }
-
                     return [...prevRecommendations, ...uniqueTracks];
                 });
             } catch (err) {
@@ -145,11 +144,23 @@ const HomeScreen = () => {
         }
     };
 
+    // delete after
+    const sample = async () => {
+        const data = await AsyncStorage.getItem("sampleSongs");
+
+        if (data) {
+            const sampleSongs = JSON.parse(data);
+            setRecommendations(sampleSongs);
+        }
+    };
+
     useEffect(() => {
         const fetchData = async () => {
-            await getProfile();
+            await setProfile();
         };
         fetchData();
+        // delete the call after
+        // sample();
     }, []);
 
     useEffect(() => {
@@ -180,6 +191,7 @@ const HomeScreen = () => {
                 activeSongId={activeSongId}
                 setIsBottomSheetVisible={setIsBottomSheetVisible}
                 setWaitingPlaylistAddition={setWaitingPlaylistAddition}
+                setIsCommentSectionVisible={setIsCommentSectionVisible}
             />
         ),
         [activeSongId, setIsBottomSheetVisible]
@@ -283,11 +295,15 @@ const HomeScreen = () => {
                         decelerationRate="fast"
                         ListFooterComponent={listFooterComponent}
                     />
-                    <CoustomBottomSheet
+                    <ShareBottomSheet
                         isVisible={isBottomSheetVisible}
                         onClose={() => setIsBottomSheetVisible(false)}
                         url={activeSongShareUrl}
                         name={activeSongName}
+                    />
+                    <CommentsBottomSheet
+                        isVisible={isCommentSectionVisible}
+                        onClose={() => setIsCommentSectionVisible(false)}
                     />
                 </GestureHandlerRootView>
             </SafeAreaView>

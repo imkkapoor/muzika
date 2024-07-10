@@ -18,11 +18,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { CLIENT_ID, REDIRECT_URI } from "@env";
 import { LinearGradient } from "expo-linear-gradient";
-import { db } from "../firebase";
+import { checkUserExists } from "../functions/dbFunctions";
+import { getProfile } from "../functions/spotify";
 import {
-    doc,
-    getDoc,
-} from "firebase/firestore";
+    getAccessToken,
+    getExpirationDate,
+} from "../functions/localStorageFunctions";
 
 const discovery = {
     authorizationEndpoint: "https://accounts.spotify.com/authorize",
@@ -32,28 +33,6 @@ const discovery = {
 const LoginScreen = () => {
     const navigation = useNavigation();
     const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        const checkTokenValidity = async () => {
-            const accessToken = await AsyncStorage.getItem("token");
-            const expirationDate = await AsyncStorage.getItem("expirationDate");
-
-            if (accessToken && expirationDate) {
-                const currentTime = Date.now();
-
-                if (currentTime < parseInt(expirationDate)) {
-                    //token is still valid
-                    navigation.replace("Main");
-                } else {
-                    // token is expired
-                    AsyncStorage.removeItem("token");
-                    AsyncStorage.removeItem("expirationDate");
-                    AsyncStorage.removeItem("userProfile");
-                }
-            }
-        };
-        checkTokenValidity();
-    }, []);
 
     const [request, response, promptAsync] = useAuthRequest(
         {
@@ -75,16 +54,9 @@ const LoginScreen = () => {
         discovery
     );
 
-    const getProfile = async () => {
-        accessToken = await AsyncStorage.getItem("token");
+    const getAndCheckUser = async () => {
         try {
-            const response = await fetch("https://api.spotify.com/v1/me", {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-            });
-            const data = await response.json();
-            await AsyncStorage.setItem("userProfile", JSON.stringify(data));
+            const data = await getProfile();
             if (!(await checkUserExists(data.id))) {
                 navigation.replace("ChoosePlaylist");
             } else navigation.replace("Main");
@@ -93,17 +65,28 @@ const LoginScreen = () => {
         }
     };
 
-    const checkUserExists = async (spotifyUserId) => {
-        const userDocRef = doc(db, "users", spotifyUserId);
-        try {
-            const userDoc = await getDoc(userDocRef);
-            console.log("User exists:", userDoc.exists());
-            return userDoc.exists(); // true if the user exists, false otherwise
-        } catch (error) {
-            console.error("Error checking user existence:", error);
-            return false;
-        }
-    }
+    useEffect(() => {
+        const checkTokenValidity = async () => {
+            const accessToken = await getAccessToken();
+            const expirationDate = await getExpirationDate();
+
+            if (accessToken && expirationDate) {
+                const currentTime = Date.now();
+
+                if (currentTime < parseInt(expirationDate)) {
+                    //token is still valid
+                    navigation.replace("Main");
+                } else {
+                    // token is expired
+                    AsyncStorage.removeItem("token");
+                    AsyncStorage.removeItem("expirationDate");
+                    AsyncStorage.removeItem("userProfile");
+                    AsyncStorage.removeItem("selectedPlaylistId");
+                }
+            }
+        };
+        checkTokenValidity();
+    }, []);
 
     useEffect(() => {
         if (response?.type === "success") {
@@ -112,7 +95,7 @@ const LoginScreen = () => {
             const expirationDate = currentTime.getTime() + 3600 * 1000;
             AsyncStorage.setItem("token", accessToken);
             AsyncStorage.setItem("expirationDate", expirationDate.toString());
-            getProfile();
+            getAndCheckUser();
         }
     }, [response]);
 

@@ -18,6 +18,10 @@ import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { useNavigation } from "@react-navigation/native";
 import LoadingFullScreen from "../components/LoadingFullScreen";
+import {
+    getAccessToken,
+    getUserProfile,
+} from "../functions/localStorageFunctions";
 
 const ChoosePlaylistScreen = () => {
     const navigation = useNavigation();
@@ -34,7 +38,7 @@ const ChoosePlaylistScreen = () => {
     }, []);
 
     const fetchPlaylists = async () => {
-        const accessToken = await AsyncStorage.getItem("token");
+        const accessToken = await getAccessToken();
 
         try {
             const user = await loadUserProfile();
@@ -59,12 +63,9 @@ const ChoosePlaylistScreen = () => {
 
     const loadUserProfile = async () => {
         try {
-            const userProfileString = await AsyncStorage.getItem("userProfile");
-            if (userProfileString) {
-                const userProfile = JSON.parse(userProfileString);
-                setUserProfile(userProfile);
-                return userProfile;
-            }
+            const userProfile = await getUserProfile();
+            setUserProfile(userProfile);
+            return userProfile;
         } catch (error) {
             console.error("Error loading user profile:", error);
         }
@@ -131,7 +132,7 @@ const ChoosePlaylistScreen = () => {
     };
 
     const createNewPlaylist = async (playlistName) => {
-        const accessToken = await AsyncStorage.getItem("token");
+        const accessToken = await getAccessToken();
 
         if (!accessToken) {
             console.error("No access token found");
@@ -139,7 +140,7 @@ const ChoosePlaylistScreen = () => {
         }
 
         try {
-            const userProfileString = await AsyncStorage.getItem("userProfile");
+            const userProfileString = await getUserProfile();
             const userProfile = JSON.parse(userProfileString);
             const response = await fetch(
                 `https://api.spotify.com/v1/users/${userProfile.id}/playlists`,
@@ -288,9 +289,7 @@ const ChoosePlaylistScreen = () => {
                     </View>
                 </Modal>
             </SafeAreaView>
-            {waitingPlaylistAddition && (
-                <LoadingFullScreen/>
-            )}
+            {waitingPlaylistAddition && <LoadingFullScreen />}
         </View>
     );
 };

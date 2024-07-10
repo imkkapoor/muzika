@@ -8,33 +8,33 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { doc, updateDoc  } from "firebase/firestore"; 
-import { useNavigation } from "@react-navigation/native"; 
+import { doc, updateDoc } from "firebase/firestore";
+import { useNavigation } from "@react-navigation/native";
 import genres from "../static/data";
 import { ArrowCircleRight, Plus, X } from "phosphor-react-native";
-import { db } from '../firebase';
+import { db } from "../firebase";
+import { getUserProfile } from "../functions/localStorageFunctions";
 
 const ChooseGenresScreen = () => {
     const [selectedGenres, setSelectedGenres] = useState([]);
-    const navigation = useNavigation()
+    const navigation = useNavigation();
 
     const handleGenrePress = (genre) => {
         if (selectedGenres.includes(genre.name)) {
-            setSelectedGenres(selectedGenres.filter((name) => name !== genre.name));
+            setSelectedGenres(
+                selectedGenres.filter((name) => name !== genre.name)
+            );
         } else if (selectedGenres.length < 5) {
             setSelectedGenres([...selectedGenres, genre.name]);
-            console.log(genre.name)
-            console.log(selectedGenres)
+            console.log(genre.name);
+            console.log(selectedGenres);
         }
     };
 
     const loadUserProfile = async () => {
         try {
-            const userProfileString = await AsyncStorage.getItem("userProfile");
-            if (userProfileString) {
-                const userProfile = JSON.parse(userProfileString);
-                return userProfile;
-            }
+            const userProfile = await getUserProfile();
+            return userProfile;
         } catch (error) {
             console.error("Error loading user profile:", error);
         }
@@ -43,7 +43,10 @@ const ChooseGenresScreen = () => {
 
     const handleGenreStorage = async () => {
         try {
-            await AsyncStorage.setItem("selectedGenreList", JSON.stringify(selectedGenres));
+            await AsyncStorage.setItem(
+                "selectedGenreList",
+                JSON.stringify(selectedGenres)
+            );
             console.log("selectedGenre:", selectedGenres);
 
             const userProfile = await loadUserProfile();
@@ -124,7 +127,12 @@ const ChooseGenresScreen = () => {
                             />
                         </Pressable>
                     ) : (
-                        <Pressable style={styles.continueBox} onPress={()=>{navigation.replace("Main")}}>
+                        <Pressable
+                            style={styles.continueBox}
+                            onPress={() => {
+                                navigation.replace("Main");
+                            }}
+                        >
                             <Text style={styles.continue}>
                                 Skip and Continue
                             </Text>

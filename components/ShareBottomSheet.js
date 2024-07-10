@@ -3,7 +3,7 @@ import React, { useRef } from "react";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { PaperPlaneTilt } from "phosphor-react-native";
 
-const CoustomBottomSheet = ({ isVisible, onClose, url, name }) => {
+const ShareBottomSheet = ({ isVisible, onClose, url, name }) => {
     const sheetRef = useRef(null);
 
     const snapPoints = ["35%"];
@@ -31,7 +31,6 @@ const CoustomBottomSheet = ({ isVisible, onClose, url, name }) => {
                 height: 5,
                 width: 55,
             }}
-            // handleHeight={}
         >
             <BottomSheetView style={styles.contentContainer}>
                 <Pressable
@@ -54,7 +53,7 @@ const CoustomBottomSheet = ({ isVisible, onClose, url, name }) => {
     );
 };
 
-export default CoustomBottomSheet;
+export default ShareBottomSheet;
 
 const styles = StyleSheet.create({
     contentContainer: {
