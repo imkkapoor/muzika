@@ -1,13 +1,14 @@
 import { Pressable, Share, StyleSheet, Text, View } from "react-native";
-import React, { useRef } from "react";
+import React, { useContext, useRef } from "react";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
-import { PaperPlaneTilt } from "phosphor-react-native";
+import { MinusCircle, PaperPlaneTilt } from "phosphor-react-native";
+import { User } from "../UserContext";
+import { addSongIdToNotInterested } from "../functions/dbFunctions";
 
-const ShareBottomSheet = ({ isVisible, onClose, url, name }) => {
+const ShareBottomSheet = ({ isVisible, onClose, url, name, itemId }) => {
+    const { currentUser } = useContext(User);
     const sheetRef = useRef(null);
-
-    const snapPoints = ["35%"];
-
+    const snapPoints = ["38%"];
     const shareSong = async (url) => {
         try {
             await Share.share({
@@ -17,6 +18,7 @@ const ShareBottomSheet = ({ isVisible, onClose, url, name }) => {
             console.error("Error in sharing song:", error);
         }
     };
+
     return (
         <BottomSheet
             ref={sheetRef}
@@ -43,8 +45,34 @@ const ShareBottomSheet = ({ isVisible, onClose, url, name }) => {
                 >
                     <View style={styles.optionContainer}>
                         <View style={styles.eachOption}>
-                            <PaperPlaneTilt weight="fill" color="white" />
-                            <Text style={styles.shareButton}>Share</Text>
+                            <PaperPlaneTilt
+                                weight="fill"
+                                color="white"
+                                size={24}
+                            />
+                            <Text style={styles.button}>Share</Text>
+                        </View>
+                    </View>
+                </Pressable>
+                <Pressable
+                    onPress={() => {
+                        addSongIdToNotInterested({itemId, currentUser});
+                    }}
+                    style={{
+                        margin: 15,
+                        padding: 10,
+                        width: "90%",
+                        marginTop: 0,
+                    }}
+                >
+                    <View style={styles.optionContainer}>
+                        <View style={styles.eachOption}>
+                            <MinusCircle
+                                weight="fill"
+                                color="white"
+                                size={26}
+                            />
+                            <Text style={styles.button}>Not interested</Text>
                         </View>
                     </View>
                 </Pressable>
@@ -63,7 +91,7 @@ const styles = StyleSheet.create({
         width: "100%",
     },
     box: { backgroundColor: "black" },
-    shareButton: {
+    button: {
         color: "white",
         fontSize: 16,
         paddingLeft: 25,

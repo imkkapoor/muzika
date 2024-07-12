@@ -9,7 +9,7 @@ import {
     ActivityIndicator,
     Alert,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
     ResponseType,
     makeRedirectUri,
@@ -17,7 +17,7 @@ import {
 } from "expo-auth-session";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
-import { CLIENT_ID, REDIRECT_URI, CLIENT_SECRET } from "@env";
+import { CLIENT_ID, REDIRECT_URI } from "@env";
 import { LinearGradient } from "expo-linear-gradient";
 import { checkUserExists } from "../functions/dbFunctions";
 import {
@@ -31,6 +31,7 @@ import {
     getRefreshToken,
     setTokens,
 } from "../functions/localStorageFunctions";
+import { User } from "../UserContext";
 
 const discovery = {
     authorizationEndpoint: "https://accounts.spotify.com/authorize",
@@ -40,6 +41,7 @@ const discovery = {
 const LoginScreen = () => {
     const navigation = useNavigation();
     const [isLoading, setIsLoading] = useState(true);
+    const { setCurrentUser } = useContext(User);
 
     const [request, response, promptAsync] = useAuthRequest(
         {
@@ -64,6 +66,7 @@ const LoginScreen = () => {
     const getAndCheckUser = async () => {
         try {
             const data = await getProfile();
+            setCurrentUser(data);
             if (!(await checkUserExists(data.id))) {
                 navigation.replace("ChoosePlaylist");
             } else navigation.replace("Main");
@@ -83,23 +86,22 @@ const LoginScreen = () => {
 
                 if (currentTime < parseInt(expirationDate)) {
                     //token is still valid
+                    await getAndCheckUser();
                     navigation.replace("Main");
                 } else {
                     // token is expired
-                    console.log(refreshToken);
                     if (refreshToken) {
-                        console.log("refreshing token");
                         const refreshResponse =
                             await exchangeRefreshTokenForAccessToken(
                                 refreshToken
                             );
-                        console.log(refreshResponse);
                         if (!refreshResponse.accessToken) {
                             Alert.alert(
                                 "Failed to refresh the token. Please try logging in again!"
                             );
                             // in case the refresh token request ever goes wrong
-                            AsyncStorage.removeItem("token");
+                            AsyncStorage.removeItem("accessToken");
+                            AsyncStorage.removeItem("refreshToken");
                             AsyncStorage.removeItem("expirationDate");
                             return;
                         }

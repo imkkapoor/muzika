@@ -12,6 +12,7 @@ const discovery = {
     tokenEndpoint: "https://accounts.spotify.com/api/token",
 };
 
+
 const getTracks = async (tracks) => {
     const accessToken = await getAccessToken();
     if (!accessToken) {
@@ -97,7 +98,6 @@ const getProfile = async () => {
 };
 
 const exchangeRefreshTokenForAccessToken = async (token) => {
-    console.log(token);
     const tokenResponse = await refreshAsync(
         {
             grantType: "refresh_token",

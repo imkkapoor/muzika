@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
     View,
     Text,
@@ -20,13 +20,13 @@ import { useNavigation } from "@react-navigation/native";
 import LoadingFullScreen from "../components/LoadingFullScreen";
 import {
     getAccessToken,
-    getUserProfile,
 } from "../functions/localStorageFunctions";
+import { User } from "../UserContext";
 
 const ChoosePlaylistScreen = () => {
     const navigation = useNavigation();
     const [playlists, setPlaylists] = useState([]);
-    const [userProfile, setUserProfile] = useState(null);
+    const {currentUser} = useContext(User)
     const [isLoading, setIsLoading] = useState(true);
     const [waitingPlaylistAddition, setWaitingPlaylistAddition] =
         useState(false);
@@ -41,7 +41,6 @@ const ChoosePlaylistScreen = () => {
         const accessToken = await getAccessToken();
 
         try {
-            const user = await loadUserProfile();
             const response = await fetch(
                 "https://api.spotify.com/v1/me/playlists",
                 {
@@ -52,7 +51,7 @@ const ChoosePlaylistScreen = () => {
             );
             const data = await response.json();
             const ownedPlaylists = data.items.filter(
-                (playlist) => playlist.owner.id === user.id
+                (playlist) => playlist.owner.id === currentUser.id
             );
             setPlaylists(ownedPlaylists);
             setIsLoading(false);
@@ -61,16 +60,7 @@ const ChoosePlaylistScreen = () => {
         }
     };
 
-    const loadUserProfile = async () => {
-        try {
-            const userProfile = await getUserProfile();
-            setUserProfile(userProfile);
-            return userProfile;
-        } catch (error) {
-            console.error("Error loading user profile:", error);
-        }
-        return null;
-    };
+    
 
     const storeUserDataInFirestore = async (
         userProfile,
@@ -98,9 +88,9 @@ const ChoosePlaylistScreen = () => {
                 selectedPlaylistId
             );
             console.log("Saved Playlist ID:", selectedPlaylistId);
-            if (userProfile) {
+            if (currentUser) {
                 await storeUserDataInFirestore(
-                    userProfile,
+                    currentUser,
                     playlistName,
                     selectedPlaylistId
                 );
@@ -140,10 +130,8 @@ const ChoosePlaylistScreen = () => {
         }
 
         try {
-            const userProfileString = await getUserProfile();
-            const userProfile = JSON.parse(userProfileString);
             const response = await fetch(
-                `https://api.spotify.com/v1/users/${userProfile.id}/playlists`,
+                `https://api.spotify.com/v1/users/${currentUser.id}/playlists`,
                 {
                     method: "POST",
                     headers: {
@@ -164,7 +152,7 @@ const ChoosePlaylistScreen = () => {
 
             const data = await response.json();
             console.log("New playlist created:", data);
-            await storeUserDataInFirestore(userProfile, playlistName, data.id);
+            await storeUserDataInFirestore(currentUser, playlistName, data.id);
             return data.id; // Extract and return the new playlist ID
         } catch (error) {
             console.error("Error creating playlist:", error);

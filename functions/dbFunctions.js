@@ -1,4 +1,4 @@
-import { doc, getDoc } from "firebase/firestore";
+import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
 const getPlaylistId = async (userProfile) => {
@@ -28,6 +28,58 @@ const checkUserExists = async (spotifyUserId) => {
         console.error("Error checking user existence:", error);
         return false;
     }
-}
+};
 
-export { getPlaylistId, checkUserExists };
+const addSongIdToNotInterested = async ({ itemId, currentUser }) => {
+    try {
+        const userDocRef = doc(db, "users", currentUser.id);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            if (userData.notInterested) {
+                await updateDoc(userDocRef, {
+                    notInterested: arrayUnion(itemId),
+                });
+            } else {
+                await updateDoc(userDocRef, {
+                    notInterested: [itemId],
+                });
+            }
+        } else {
+            console.error("User document does not exist");
+        }
+    } catch (err) {
+        console.error(
+            "Error storing the song to notInterested in Firestoree:",
+            err
+        );
+    }
+};
+
+const getNotInterestedSongIds = async (currentUser) => {
+    spotifyUserId = currentUser.id;
+    const userDocRef = doc(db, "users", spotifyUserId);
+    try {
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            if (userData.notInterested) {
+                return userData.notInterested;
+            }
+            return -1;
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error("Error getting notInterested song Ids:", error);
+        return null;
+    }
+};
+
+export {
+    getPlaylistId,
+    checkUserExists,
+    addSongIdToNotInterested,
+    getNotInterestedSongIds,
+};

@@ -6,18 +6,19 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { doc, updateDoc } from "firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
 import genres from "../static/data";
 import { ArrowCircleRight, Plus, X } from "phosphor-react-native";
 import { db } from "../firebase";
-import { getUserProfile } from "../functions/localStorageFunctions";
+import { User } from "../UserContext";
 
 const ChooseGenresScreen = () => {
     const [selectedGenres, setSelectedGenres] = useState([]);
     const navigation = useNavigation();
+    const {currentUser} = useContext(User)
 
     const handleGenrePress = (genre) => {
         if (selectedGenres.includes(genre.name)) {
@@ -31,16 +32,6 @@ const ChooseGenresScreen = () => {
         }
     };
 
-    const loadUserProfile = async () => {
-        try {
-            const userProfile = await getUserProfile();
-            return userProfile;
-        } catch (error) {
-            console.error("Error loading user profile:", error);
-        }
-        return null;
-    };
-
     const handleGenreStorage = async () => {
         try {
             await AsyncStorage.setItem(
@@ -49,9 +40,8 @@ const ChooseGenresScreen = () => {
             );
             console.log("selectedGenre:", selectedGenres);
 
-            const userProfile = await loadUserProfile();
-            if (userProfile) {
-                await storeGenreInFirestore(userProfile, selectedGenres);
+            if (currentUser) {
+                await storeGenreInFirestore(currentUser, selectedGenres);
             } else {
                 console.log("User profile is null");
             }

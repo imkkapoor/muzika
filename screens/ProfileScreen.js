@@ -8,44 +8,33 @@ import {
     FlatList,
     ActivityIndicator,
 } from "react-native";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { CaretLeft } from "phosphor-react-native";
 import { useNavigation } from "@react-navigation/native";
 import { db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { getTracks } from "../functions/spotify";
-import { getUserProfile } from "../functions/localStorageFunctions";
 import RecentlyAddedCard from "../components/RecentlyAddedCard";
+import { User } from "../UserContext";
 
 const ProfileScreen = () => {
     const maxNameLength = 12;
     const maxArtistNameLength = 14;
     const navigation = useNavigation();
-    const [userProfile, setUserProfile] = useState(null);
     const [recentlyAddedTracks, setRecentlyAddedTracks] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { currentUser } = useContext(User);
 
     useEffect(() => {
-        const loadUserProfile = async () => {
-            const profile = await getUserProfile();
-            if (profile) {
-                setUserProfile(profile);
-            }
-        };
-
-        loadUserProfile();
-    }, []);
-
-    useEffect(() => {
-        if (userProfile) {
+        if (currentUser) {
             getRecentAdds();
         }
-    }, [userProfile]);
+    }, [currentUser]);
 
     const getRecentAdds = async () => {
         setLoading(true);
         try {
-            const userDocRef = doc(db, "users", userProfile.id);
+            const userDocRef = doc(db, "users", currentUser.id);
             const userDocSnapshot = await getDoc(userDocRef);
 
             if (userDocSnapshot.exists()) {
@@ -94,14 +83,14 @@ const ProfileScreen = () => {
                 </View>
                 <View style={styles.personalInfoContainer}>
                     <Image
-                        source={{ uri: userProfile?.images[1].url }}
+                        source={{ uri: currentUser?.images[1].url }}
                         style={styles.profilePicture}
                     />
                     <View style={styles.nameAndEmailContainer}>
                         <Text style={styles.name}>
-                            {userProfile?.display_name}
+                            {currentUser?.display_name}
                         </Text>
-                        <Text style={styles.email}>{userProfile?.email}</Text>
+                        <Text style={styles.email}>{currentUser?.email}</Text>
                     </View>
                 </View>
 

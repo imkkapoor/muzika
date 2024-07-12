@@ -8,7 +8,13 @@ import {
     FlatList,
     Image,
 } from "react-native";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+    useCallback,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import MusicCard from "../components/MusicCard";
@@ -16,16 +22,16 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import ShareBottomSheet from "../components/ShareBottomSheet";
 import LoadingFullScreen from "../components/LoadingFullScreen";
 import { getPLaylistSpecificTracks } from "../functions/spotify";
-import { getPlaylistId } from "../functions/dbFunctions";
 import {
-    getAccessToken,
-    getUserProfile,
-} from "../functions/localStorageFunctions";
+    getNotInterestedSongIds,
+    getPlaylistId,
+} from "../functions/dbFunctions";
+import { getAccessToken } from "../functions/localStorageFunctions";
 import CommentsBottomSheet from "../components/CommentsBottomSheet";
+import { User } from "../UserContext";
 
 const HomeScreen = () => {
     const navigation = useNavigation();
-    const [userProfile, setUserProfile] = useState();
     const [topSongs, setTopSongs] = useState([]);
     const [recommendations, setRecommendations] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -38,19 +44,11 @@ const HomeScreen = () => {
     const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
     const [isCommentSectionVisible, setIsCommentSectionVisible] =
         useState(false);
-
     const [waitingPlaylistAddition, setWaitingPlaylistAddition] =
         useState(false);
     const [alreadyPresentTrackIds, setAlreadyPresentTrackIds] = useState([]);
-
-    const setProfile = async () => {
-        try {
-            const userProfile = await getUserProfile();
-            setUserProfile(userProfile);
-        } catch (error) {
-            console.error("Error parsing JSON string:", error);
-        }
-    };
+    const [notInterestedSongIds, setNotInterestedSongIds] = useState([]);
+    const { currentUser } = useContext(User);
 
     const getTopSongs = async () => {
         const accessToken = await getAccessToken();
@@ -77,18 +75,19 @@ const HomeScreen = () => {
     };
 
     const getAlreadyPresentTrackIds = async () => {
-        const playlistId = await getPlaylistId(userProfile);
+        const playlistId = await getPlaylistId(currentUser);
         const alreadyPresentTracksIds = await getPLaylistSpecificTracks(
             playlistId
         );
-        // console.log(alreadyPresentTrackIds);
         setAlreadyPresentTrackIds(alreadyPresentTracksIds);
     };
 
     const filterTracks = async (data) => {
         const playableTracks = data.tracks.filter(
             (track) =>
-                track.preview_url && !alreadyPresentTrackIds.includes(track.id)
+                track.preview_url &&
+                (!alreadyPresentTrackIds.includes(track.id) ||
+                    !notInterestedSongIds.includes(track.id))
         );
         return playableTracks;
     };
@@ -155,28 +154,27 @@ const HomeScreen = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            await setProfile();
+            if (currentUser) {
+                await getAlreadyPresentTrackIds();
+                setNotInterestedSongIds(
+                    await getNotInterestedSongIds(currentUser)
+                );
+                await getTopSongs();
+            }
         };
         fetchData();
-        // delete the call after
-        // sample();
-    }, []);
-
-    useEffect(() => {
-        if (userProfile) {
-            getAlreadyPresentTrackIds();
-            getTopSongs();
-        }
-    }, [userProfile]);
+    }, [currentUser]);
 
     useEffect(() => {
         if (
             topSongs.length > 0 &&
-            (alreadyPresentTrackIds.length > 0 || alreadyPresentTrackIds === -1)
+            (alreadyPresentTrackIds.length > 0 ||
+                alreadyPresentTrackIds === -1) &&
+            (notInterestedSongIds.length > 0 || notInterestedSongIds === -1)
         ) {
             getRecommendations(topSongs);
         }
-    }, [topSongs, alreadyPresentTrackIds]);
+    }, [topSongs, alreadyPresentTrackIds, notInterestedSongIds]);
 
     const onViewableItemsChanged = useCallback(({ viewableItems }) => {
         if (viewableItems.length > 0 && viewableItems[0].isViewable) {
@@ -274,7 +272,7 @@ const HomeScreen = () => {
                         }}
                     >
                         <Image
-                            source={{ uri: userProfile?.images[1].url }}
+                            source={{ uri: currentUser?.images[1].url }}
                             style={{ height: 33, width: 33, borderRadius: 100 }}
                         ></Image>
                     </Pressable>
@@ -302,6 +300,7 @@ const HomeScreen = () => {
                         onClose={() => setIsBottomSheetVisible(false)}
                         url={activeSongShareUrl}
                         name={activeSongName}
+                        itemId={activeSongId}
                     />
                     <CommentsBottomSheet
                         isVisible={isCommentSectionVisible}

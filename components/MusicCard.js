@@ -1,5 +1,11 @@
 import { Alert, Image, Pressable, StyleSheet, Text, View } from "react-native";
-import React, { memo, useCallback, useEffect, useState } from "react";
+import React, {
+    memo,
+    useCallback,
+    useContext,
+    useEffect,
+    useState,
+} from "react";
 import { Audio } from "expo-av";
 import { Marquee } from "@animatereactnative/marquee";
 import {
@@ -12,10 +18,8 @@ import { useFocusEffect } from "@react-navigation/native";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { getPlaylistId } from "../functions/dbFunctions";
-import {
-    getAccessToken,
-    getUserProfile,
-} from "../functions/localStorageFunctions";
+import { getAccessToken } from "../functions/localStorageFunctions";
+import { User } from "../UserContext";
 
 const MusicCard = ({
     item,
@@ -27,7 +31,7 @@ const MusicCard = ({
     const [isPlaying, setIsPlaying] = useState(false);
     const [sound, setSound] = useState(null);
     const artistNames = item.artists.map((artist) => artist.name).join(", ");
-
+    const { currentUser } = useContext(User);
     const [isAdded, setIsAdded] = useState(false);
     const maxTitleLength = 17;
     const maxArtistNameLength = 32;
@@ -164,8 +168,7 @@ const MusicCard = ({
 
     const addToPlaylist = async () => {
         setWaitingPlaylistAddition(true);
-        const userProfile = await getUserProfile();
-        const playlistId = await getPlaylistId(userProfile);
+        const playlistId = await getPlaylistId(currentUser);
         const accessToken = await getAccessToken();
 
         if (!accessToken) {
@@ -194,7 +197,7 @@ const MusicCard = ({
 
             const data = await response.json();
             console.log("Track added to playlist:", data);
-            addSongToRecentAdds(userProfile);
+            addSongToRecentAdds(currentUser);
             setIsAdded(true);
         } catch (error) {
             console.error("Error adding track to the playlist:", error);
