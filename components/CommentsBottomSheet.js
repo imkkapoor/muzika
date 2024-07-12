@@ -1,7 +1,6 @@
 import { Pressable, Share, StyleSheet, Text, View } from "react-native";
 import React, { useRef } from "react";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
-import { PaperPlaneTilt } from "phosphor-react-native";
 
 const CommentsBottomSheet = ({ isVisible, onClose }) => {
     const sheetRef = useRef(null);

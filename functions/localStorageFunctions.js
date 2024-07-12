@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const getAccessToken = async () => {
     try {
-        const token = await AsyncStorage.getItem("token");
+        const token = await AsyncStorage.getItem("accessToken");
         return token;
     } catch (error) {
         console.error("Error retrieving access token:", error);
@@ -31,5 +31,28 @@ const getUserProfile = async () => {
         console.error("Error parsing JSON string:", error);
     }
 };
+const getRefreshToken = async () => {
+    try {
+        const token = await AsyncStorage.getItem("refreshToken");
+        return token;
+    } catch (error) {
+        return null;
+    }
+};
 
-export { getUserProfile, getAccessToken, getExpirationDate };
+const setTokens = async (response) => {
+    const currentTime = new Date();
+    const expirationDate = currentTime.getTime() + 3600 * 1000;
+    AsyncStorage.setItem("accessToken", response.accessToken);
+    if (response.refreshToken) {
+        AsyncStorage.setItem("refreshToken", response.refreshToken);
+    }
+    AsyncStorage.setItem("expirationDate", expirationDate.toString());
+};
+export {
+    getUserProfile,
+    getAccessToken,
+    getExpirationDate,
+    getRefreshToken,
+    setTokens,
+};

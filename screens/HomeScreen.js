@@ -107,7 +107,6 @@ const HomeScreen = () => {
                     },
                 });
                 if (!response.ok) {
-                    console.log(response);
                     throw new Error("Error getting recommendations");
                 }
 

@@ -7,6 +7,7 @@ import {
     Image,
     StyleSheet,
     ActivityIndicator,
+    Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import {
@@ -16,13 +17,19 @@ import {
 } from "expo-auth-session";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
-import { CLIENT_ID, REDIRECT_URI } from "@env";
+import { CLIENT_ID, REDIRECT_URI, CLIENT_SECRET } from "@env";
 import { LinearGradient } from "expo-linear-gradient";
 import { checkUserExists } from "../functions/dbFunctions";
-import { getProfile } from "../functions/spotify";
+import {
+    exchangeCodeForToken,
+    exchangeRefreshTokenForAccessToken,
+    getProfile,
+} from "../functions/spotify";
 import {
     getAccessToken,
     getExpirationDate,
+    getRefreshToken,
+    setTokens,
 } from "../functions/localStorageFunctions";
 
 const discovery = {
@@ -36,7 +43,7 @@ const LoginScreen = () => {
 
     const [request, response, promptAsync] = useAuthRequest(
         {
-            responseType: ResponseType.Token,
+            responseType: ResponseType.Code,
             clientId: CLIENT_ID,
             scopes: [
                 "user-top-read",
@@ -69,6 +76,7 @@ const LoginScreen = () => {
         const checkTokenValidity = async () => {
             const accessToken = await getAccessToken();
             const expirationDate = await getExpirationDate();
+            const refreshToken = await getRefreshToken();
 
             if (accessToken && expirationDate) {
                 const currentTime = Date.now();
@@ -78,10 +86,28 @@ const LoginScreen = () => {
                     navigation.replace("Main");
                 } else {
                     // token is expired
-                    AsyncStorage.removeItem("token");
-                    AsyncStorage.removeItem("expirationDate");
-                    AsyncStorage.removeItem("userProfile");
-                    AsyncStorage.removeItem("selectedPlaylistId");
+                    console.log(refreshToken);
+                    if (refreshToken) {
+                        console.log("refreshing token");
+                        const refreshResponse =
+                            await exchangeRefreshTokenForAccessToken(
+                                refreshToken
+                            );
+                        console.log(refreshResponse);
+                        if (!refreshResponse.accessToken) {
+                            Alert.alert(
+                                "Failed to refresh the token. Please try logging in again!"
+                            );
+                            // in case the refresh token request ever goes wrong
+                            AsyncStorage.removeItem("token");
+                            AsyncStorage.removeItem("expirationDate");
+                            return;
+                        }
+                        await setTokens(refreshResponse);
+                        await getAndCheckUser();
+
+                        return;
+                    }
                 }
             }
         };
@@ -89,14 +115,15 @@ const LoginScreen = () => {
     }, []);
 
     useEffect(() => {
-        if (response?.type === "success") {
-            const accessToken = response.authentication.accessToken;
-            const currentTime = new Date();
-            const expirationDate = currentTime.getTime() + 3600 * 1000;
-            AsyncStorage.setItem("token", accessToken);
-            AsyncStorage.setItem("expirationDate", expirationDate.toString());
-            getAndCheckUser();
-        }
+        const handleAuthResponse = async () => {
+            if (response?.type === "success") {
+                const { code } = response.params;
+                const tokenResponse = await exchangeCodeForToken(code);
+                await setTokens(tokenResponse);
+                await getAndCheckUser();
+            }
+        };
+        handleAuthResponse();
     }, [response]);
 
     return (

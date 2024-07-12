@@ -1,5 +1,16 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getAccessToken } from "./localStorageFunctions";
+import { CLIENT_ID, REDIRECT_URI, CLIENT_SECRET } from "@env";
+import {
+    exchangeCodeAsync,
+    makeRedirectUri,
+    refreshAsync,
+} from "expo-auth-session";
+
+const discovery = {
+    authorizationEndpoint: "https://accounts.spotify.com/authorize",
+    tokenEndpoint: "https://accounts.spotify.com/api/token",
+};
 
 const getTracks = async (tracks) => {
     const accessToken = await getAccessToken();
@@ -58,7 +69,6 @@ const getPLaylistSpecificTracks = async (playlistId) => {
             const alreadyPresentTrackIds = data.items.map(
                 (item) => item.track.id
             );
-            console.log(alreadyPresentTrackIds);
             return alreadyPresentTrackIds;
         } else {
             return -1;
@@ -86,4 +96,46 @@ const getProfile = async () => {
     }
 };
 
-export { getTracks, getPLaylistSpecificTracks, getProfile };
+const exchangeRefreshTokenForAccessToken = async (token) => {
+    console.log(token);
+    const tokenResponse = await refreshAsync(
+        {
+            grantType: "refresh_token",
+            refreshToken: token,
+            clientId: CLIENT_ID,
+            clientSecret: CLIENT_SECRET,
+            
+        },
+        discovery
+    );
+
+    return tokenResponse;
+};
+
+const exchangeCodeForToken = async (code) => {
+    try {
+        const tokenResponse = await exchangeCodeAsync(
+            {
+                clientId: CLIENT_ID,
+                clientSecret: CLIENT_SECRET,
+                code,
+                redirectUri: makeRedirectUri({
+                    scheme: REDIRECT_URI,
+                }),
+            },
+            discovery
+        );
+        return tokenResponse;
+    } catch (error) {
+        console.error("Error exchanging code:", error);
+        return null;
+    }
+};
+
+export {
+    getTracks,
+    getPLaylistSpecificTracks,
+    getProfile,
+    exchangeCodeForToken,
+    exchangeRefreshTokenForAccessToken,
+};
