@@ -86,8 +86,8 @@ const HomeScreen = () => {
         const playableTracks = data.tracks.filter(
             (track) =>
                 track.preview_url &&
-                (!alreadyPresentTrackIds.includes(track.id) ||
-                    !notInterestedSongIds.includes(track.id))
+                !alreadyPresentTrackIds.includes(track.id) &&
+                !notInterestedSongIds.includes(track.id)
         );
         return playableTracks;
     };
@@ -242,43 +242,47 @@ const HomeScreen = () => {
     }
 
     return (
-        <View
-            style={{
-                backgroundColor: "black",
-                height: "100%",
-            }}
-        >
-            <SafeAreaView>
-                <View style={styles.navBar}>
-                    <Text
-                        style={{
-                            color: "white",
-                            fontFamily: "Inter-SemiBold",
-                            fontSize: 20,
-                        }}
-                    >
-                        /música
-                    </Text>
-                    {/* <Pressable
+        <GestureHandlerRootView style={styles}>
+            <View
+                style={{
+                    backgroundColor: "black",
+                    height: "100%",
+                }}
+            >
+                <SafeAreaView>
+                    <View style={styles.navBar}>
+                        <Text
+                            style={{
+                                color: "white",
+                                fontFamily: "Inter-SemiBold",
+                                fontSize: 20,
+                            }}
+                        >
+                            /múzika
+                        </Text>
+                        {/* <Pressable
                         onPress={() => {
                             navigation.navigate("ChoosePlaylist");
                         }}
                     >
                         <Text style={{ color: "white" }}>Choose Playlist</Text>
                     </Pressable> */}
-                    <Pressable
-                        onPress={() => {
-                            navigation.navigate("Profile");
-                        }}
-                    >
-                        <Image
-                            source={{ uri: currentUser?.images[1].url }}
-                            style={{ height: 33, width: 33, borderRadius: 100 }}
-                        ></Image>
-                    </Pressable>
-                </View>
+                        <Pressable
+                            onPress={() => {
+                                navigation.navigate("Profile");
+                            }}
+                        >
+                            <Image
+                                source={{ uri: currentUser?.images[1].url }}
+                                style={{
+                                    height: 33,
+                                    width: 33,
+                                    borderRadius: 100,
+                                }}
+                            ></Image>
+                        </Pressable>
+                    </View>
 
-                <GestureHandlerRootView style={styles}>
                     <FlatList
                         data={recommendations}
                         keyExtractor={keyExtractor}
@@ -302,14 +306,15 @@ const HomeScreen = () => {
                         name={activeSongName}
                         itemId={activeSongId}
                     />
-                    <CommentsBottomSheet
-                        isVisible={isCommentSectionVisible}
-                        onClose={() => setIsCommentSectionVisible(false)}
-                    />
-                </GestureHandlerRootView>
-            </SafeAreaView>
-            {waitingPlaylistAddition && <LoadingFullScreen />}
-        </View>
+                </SafeAreaView>
+                <CommentsBottomSheet
+                    isVisible={isCommentSectionVisible}
+                    onClose={() => setIsCommentSectionVisible(false)}
+                />
+
+                {waitingPlaylistAddition && <LoadingFullScreen />}
+            </View>
+        </GestureHandlerRootView>
     );
 };
 
