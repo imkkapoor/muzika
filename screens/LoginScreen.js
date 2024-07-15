@@ -135,7 +135,7 @@ const LoginScreen = () => {
         >
             {isLoading && (
                 <View style={styles.loading}>
-                    <ActivityIndicator size="large" color="white" />
+                    <ActivityIndicator size="small" color="white" />
                 </View>
             )}
             {!isLoading && (

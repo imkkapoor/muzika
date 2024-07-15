@@ -220,7 +220,7 @@ const HomeScreen = () => {
     if (loading) {
         return (
             <View style={styles.loading}>
-                <ActivityIndicator size="large" color="white" />
+                <ActivityIndicator size="small" color="white" />
             </View>
         );
     }
@@ -299,14 +299,14 @@ const HomeScreen = () => {
                         decelerationRate="fast"
                         ListFooterComponent={listFooterComponent}
                     />
-                    <ShareBottomSheet
-                        isVisible={isBottomSheetVisible}
-                        onClose={() => setIsBottomSheetVisible(false)}
-                        url={activeSongShareUrl}
-                        name={activeSongName}
-                        itemId={activeSongId}
-                    />
                 </SafeAreaView>
+                <ShareBottomSheet
+                    isVisible={isBottomSheetVisible}
+                    onClose={() => setIsBottomSheetVisible(false)}
+                    url={activeSongShareUrl}
+                    name={activeSongName}
+                    itemId={activeSongId}
+                />
                 <CommentsBottomSheet
                     isVisible={isCommentSectionVisible}
                     onClose={() => setIsCommentSectionVisible(false)}

@@ -8,7 +8,7 @@ import { addSongIdToNotInterested } from "../functions/dbFunctions";
 const ShareBottomSheet = ({ isVisible, onClose, url, name, itemId }) => {
     const { currentUser } = useContext(User);
     const sheetRef = useRef(null);
-    const snapPoints = ["38%"];
+    const snapPoints = ["23%"];
     const shareSong = async (url) => {
         try {
             await Share.share({
@@ -56,7 +56,7 @@ const ShareBottomSheet = ({ isVisible, onClose, url, name, itemId }) => {
                 </Pressable>
                 <Pressable
                     onPress={() => {
-                        addSongIdToNotInterested({itemId, currentUser});
+                        addSongIdToNotInterested({ itemId, currentUser });
                     }}
                     style={{
                         margin: 15,

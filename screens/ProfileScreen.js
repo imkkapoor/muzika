@@ -93,20 +93,22 @@ const ProfileScreen = () => {
                         <Text style={styles.email}>{currentUser?.email}</Text>
                     </View>
                 </View>
-
-                <View style={styles.recentlyAddedContainer}>
-                    {loading ? (
-                        <ActivityIndicator size="small" color="white" />
-                    ) : (
-                        <FlatList
-                            data={recentlyAddedTracks}
-                            renderItem={renderItem}
-                            horizontal={true}
-                            snapToInterval={149}
-                            snapToAlignment="start"
-                            decelerationRate="fast"
-                        />
-                    )}
+                <View style={styles.recentlyAddedBox}>
+                    <Text style={styles.recentAddText}>Your recent adds</Text>
+                    <View style={styles.recentlyAddedContainer}>
+                        {loading ? (
+                            <ActivityIndicator size="small" color="white" />
+                        ) : (
+                            <FlatList
+                                data={recentlyAddedTracks}
+                                renderItem={renderItem}
+                                horizontal={true}
+                                snapToInterval={149}
+                                snapToAlignment="start"
+                                decelerationRate="fast"
+                            />
+                        )}
+                    </View>
                 </View>
             </SafeAreaView>
         </View>
@@ -154,12 +156,21 @@ const styles = StyleSheet.create({
     nameAndEmailContainer: {
         marginLeft: 23,
     },
-    recentlyAddedContainer: {
+    recentlyAddedBox: {
         marginTop: 50,
+    },
+    recentlyAddedContainer: {
         display: "flex",
         justifyContent: "center",
         flexDirection: "row",
         alignItems: "center",
         height: 194,
+        marginTop: 5,
+    },
+    recentAddText: {
+        marginLeft: 30,
+        color: "white",
+        fontSize: 16,
+        fontFamily: "Inter-SemiBold",
     },
 });
