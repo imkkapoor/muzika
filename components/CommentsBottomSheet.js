@@ -1,55 +1,51 @@
 import {
+    ActivityIndicator,
     FlatList,
-    Image,
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
 } from "react-native";
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import BottomSheet, { BottomSheetTextInput } from "@gorhom/bottom-sheet";
-import { Heart, PaperPlaneRight } from "phosphor-react-native";
+import { PaperPlaneRight } from "phosphor-react-native";
 import { User } from "../UserContext";
+import { addComment, getComments } from "../functions/dbFunctions";
+import EachComment from "./EachComment";
 
-const CommentsBottomSheet = ({ isVisible, onClose }) => {
+const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
     const sheetRef = useRef(null);
     const [comment, setComment] = useState("");
+    const [commentsToDisplay, setCommentsToDisplay] = useState([]);
+    const [postingComment, setPostingComment] = useState(false);
+    const [loadingComments, setLoadingComments] = useState(true);
     const { currentUser } = useContext(User);
-    const comments = [
-        { id: "1", name: "John Doe", text: "Love this song!" },
-        { id: "2", name: "Jane Smith", text: "Great melody!" },
-        { id: "3", name: "Alex Jones", text: "Amazing lyrics!" },
-        { id: "4", name: "Emily Clark", text: "This track is fire!" },
-        { id: "5", name: "Michael Brown", text: "Can't stop listening!" },
-        { id: "6", name: "Sarah White", text: "On repeat!" },
-        { id: "7", name: "David Lee", text: "Such a vibe!" },
-        { id: "8", name: "Linda Wilson", text: "Incredible production!" },
-        { id: "9", name: "Robert Taylor", text: "Masterpiece!" },
-        { id: "10", name: "Patricia Moore", text: "Beautiful!" },
-        {
-            id: "11",
-            name: "James Anderson",
-            text: "My favorite song right now!",
-        },
-        { id: "12", name: "Mary Thomas", text: "So good!" },
-        { id: "13", name: "Daniel Jackson", text: "Fantastic track!" },
-        { id: "14", name: "Laura Harris", text: "Absolutely love it!" },
-        { id: "15", name: "Kevin Martin", text: "Great job!" },
-    ];
     const snapPoints = ["75%"];
 
+    useEffect(() => {
+        setComment("");
+    }, [songId]);
+
+    useEffect(() => {
+        if (isVisible && !postingComment) {
+            fetchComments(songId);
+        }
+    }, [isVisible, postingComment]);
+
+    const fetchComments = async (songId) => {
+        setLoadingComments(true);
+        try {
+            const comments = await getComments(songId);
+            setCommentsToDisplay(comments);
+        } catch (error) {
+            console.error("Failed to fetch comments:", error);
+        } finally {
+            setLoadingComments(false);
+        }
+    };
+
     const renderItem = ({ item }) => (
-        <View style={styles.eachCommentContainer}>
-            <Image
-                source={{ uri: currentUser?.images[1].url }}
-                style={styles.profilePicture}
-            />
-            <View style={styles.nameAndComment}>
-                <Text style={styles.name}>{item.name}</Text>
-                <Text style={styles.comment}>{item.text}</Text>
-            </View>
-            <Heart size={17} color="white" />
-        </View>
+        <EachComment item={item} songId={songId} currentUser={currentUser} />
     );
     return (
         <BottomSheet
@@ -70,21 +66,65 @@ const CommentsBottomSheet = ({ isVisible, onClose }) => {
             <View style={styles.contentContainer}>
                 <Text style={styles.commentTitle}>Comments</Text>
                 <View style={styles.lineSeprator} />
-                <FlatList
-                    data={comments}
-                    keyExtractor={(item) => item.id}
-                    renderItem={renderItem}
-                    ItemSeparatorComponent={<View style={{ height: 20 }} />}
-                    style={styles.listStyle}
-                    contentContainerStyle={{
-                        display: "flex",
-                        alignItems: "center",
-                        alignContent: "center",
-                        justifyContent: "center",
-                        marginTop: 26,
-                        paddingBottom: 35,
-                    }}
-                />
+                {loadingComments ? (
+                    <ActivityIndicator
+                        size="small"
+                        color="white"
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            alignContent: "center",
+                            justifyContent: "center",
+                            flex: 1,
+                        }}
+                    />
+                ) : commentsToDisplay.length == 0 ? (
+                    <View
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            alignContent: "center",
+                            justifyContent: "center",
+                            flex: 1,
+                        }}
+                    >
+                        <Text
+                            style={{
+                                color: "white",
+                                fontSize: 18,
+                                fontFamily: "Inter-SemiBold",
+                            }}
+                        >
+                            No comments yet
+                        </Text>
+                        <Text
+                            style={{
+                                color: "#979797",
+                                fontSize: 15,
+                                fontFamily: "Inter-SemiBold",
+                                marginTop: 8,
+                            }}
+                        >
+                            Say something!
+                        </Text>
+                    </View>
+                ) : (
+                    <FlatList
+                        data={commentsToDisplay}
+                        keyExtractor={(item) => item.id}
+                        renderItem={renderItem}
+                        ItemSeparatorComponent={<View style={{ height: 20 }} />}
+                        style={styles.listStyle}
+                        contentContainerStyle={{
+                            display: "flex",
+                            alignItems: "center",
+                            alignContent: "center",
+                            justifyContent: "center",
+                            marginTop: 26,
+                            paddingBottom: 35,
+                        }}
+                    />
+                )}
                 <View style={styles.inputContainer}>
                     <View style={styles.borderBox}>
                         <BottomSheetTextInput
@@ -94,7 +134,20 @@ const CommentsBottomSheet = ({ isVisible, onClose }) => {
                             placeholder="Add a comment..."
                             placeholderTextColor="#979797"
                         />
-                        <TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => {
+                                addComment({
+                                    comment: comment,
+                                    songId: songId,
+                                    songName: songName,
+                                    currentUserId: currentUser.id,
+                                    name: currentUser.display_name,
+                                    imageLink: currentUser?.images[1].url,
+                                    setPostingComment: setPostingComment,
+                                    setComment: setComment,
+                                });
+                            }}
+                        >
                             <PaperPlaneRight
                                 style={styles.sendButton}
                                 color="#979797"
@@ -117,6 +170,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         width: "100%",
+        backgroundColor: "black",
         flex: 1,
     },
     commentTitle: {
@@ -132,7 +186,6 @@ const styles = StyleSheet.create({
         marginTop: 20,
         width: "100%",
     },
-
     commentContainer: {
         width: "100%",
         height: 50,
@@ -159,12 +212,9 @@ const styles = StyleSheet.create({
         fontFamily: "Inter-Regular",
         fontSize: 14,
         color: "white",
-        marginTop: 7,
+        marginTop: 4,
     },
-    box: {
-        backgroundColor: "black",
-        //  flex: 1
-    },
+    box: {},
     inputContainer: {
         flexDirection: "row",
         backgroundColor: "#101010",

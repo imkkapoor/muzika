@@ -298,6 +298,7 @@ const HomeScreen = () => {
                         snapToAlignment="start"
                         decelerationRate="fast"
                         ListFooterComponent={listFooterComponent}
+                        onEndReachedThreshold={0.1}
                     />
                 </SafeAreaView>
                 <ShareBottomSheet
@@ -310,6 +311,8 @@ const HomeScreen = () => {
                 <CommentsBottomSheet
                     isVisible={isCommentSectionVisible}
                     onClose={() => setIsCommentSectionVisible(false)}
+                    songId={activeSongId}
+                    songName={activeSongName}
                 />
 
                 {waitingPlaylistAddition && <LoadingFullScreen />}

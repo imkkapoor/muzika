@@ -1,5 +1,19 @@
-import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
+import {
+    arrayUnion,
+    doc,
+    getDoc,
+    updateDoc,
+    setDoc,
+    collection,
+    Timestamp,
+    query,
+    getDocs,
+    arrayRemove,
+} from "firebase/firestore";
 import { db } from "../firebase";
+import * as Crypto from "expo-crypto";
+import * as Haptics from "expo-haptics";
+import { Keyboard } from "react-native";
 
 const getPlaylistId = async (userProfile) => {
     spotifyUserId = userProfile.id;
@@ -77,9 +91,126 @@ const getNotInterestedSongIds = async (currentUser) => {
     }
 };
 
+async function generateUniqueId() {
+    const buffer = await Crypto.getRandomBytesAsync(16);
+    return buffer.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+const addComment = async ({
+    songId,
+    songName,
+    comment,
+    currentUserId,
+    name,
+    imageLink,
+    setPostingComment,
+    setComment,
+}) => {
+    setPostingComment(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (!comment.trim()) {
+        setPostingComment(false);
+        return;
+    }
+    try {
+        Keyboard.dismiss();
+        setComment("");
+
+        const songDocRef = doc(db, "songs", songId);
+        const songDoc = await getDoc(songDocRef);
+        const commentId = await generateUniqueId();
+        const commentData = {
+            userId: currentUserId,
+            username: name,
+            content: comment,
+            likeCount: 0,
+            likedBy: [],
+            timestamp: Timestamp.now(),
+            profileImage: imageLink,
+        };
+
+        if (songDoc.exists()) {
+            const commentsCollectionRef = collection(songDocRef, "comments");
+            await setDoc(doc(commentsCollectionRef, commentId), commentData);
+        } else {
+            await setDoc(songDocRef, { name: songName });
+            const commentsCollectionRef = collection(songDocRef, "comments");
+            await setDoc(doc(commentsCollectionRef, commentId), commentData);
+        }
+        return commentId;
+    } catch (err) {
+        console.error("Error in adding the comment:", err);
+    } finally {
+        setPostingComment(false);
+    }
+};
+
+const getComments = async (songId) => {
+    try {
+        const commentsCollectionRef = collection(
+            db,
+            "songs",
+            songId,
+            "comments"
+        );
+        const q = query(commentsCollectionRef);
+        const querySnapshot = await getDocs(q);
+
+        const comments = [];
+        querySnapshot.forEach((doc) => {
+            comments.push({
+                id: doc.id,
+                ...doc.data(),
+            });
+        });
+
+        return comments;
+    } catch (err) {
+        console.error("Error fetching comments", err);
+    }
+};
+
+const toggleCommentLike = async ({ item, songId, currentUser }) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    try {
+        const commentRef = doc(db, `songs/${songId}/comments/${item.id}`);
+        const commentDoc = await getDoc(commentRef);
+
+        if (!commentDoc.exists()) {
+            console.error("Comment does not exist!");
+            return;
+        }
+
+        const commentData = commentDoc.data();
+        const likedBy = commentData.likedBy || [];
+
+        if (likedBy.includes(currentUser.id)) {
+            // User has already liked the comment, so we remove the like
+            await updateDoc(commentRef, {
+                likeCount: commentData.likeCount - 1,
+                likedBy: arrayRemove(currentUser.id),
+            });
+            return false;
+        } else {
+            // User has not liked the comment yet, so we add the like
+            await updateDoc(commentRef, {
+                likeCount: commentData.likeCount + 1,
+                likedBy: arrayUnion(currentUser.id),
+            });
+            return true;
+        }
+    } catch (error) {
+        console.error("Error toggling like:", error);
+    }
+};
+
 export {
     getPlaylistId,
     checkUserExists,
     addSongIdToNotInterested,
     getNotInterestedSongIds,
+    addComment,
+    getComments,
+    toggleCommentLike,
 };
