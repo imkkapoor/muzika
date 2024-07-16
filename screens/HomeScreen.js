@@ -304,6 +304,7 @@ const HomeScreen = () => {
                     isVisible={isCommentSectionVisible}
                     onClose={() => setIsCommentSectionVisible(false)}
                     songId={activeSongId}
+                    songName={activeSongName}
                 />
 
                 {waitingPlaylistAddition && <LoadingFullScreen />}

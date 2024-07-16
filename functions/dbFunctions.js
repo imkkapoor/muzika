@@ -191,17 +191,16 @@ const toggleCommentLike = async ({ item, songId, currentUser }) => {
                 likeCount: commentData.likeCount - 1,
                 likedBy: arrayRemove(currentUser.id),
             });
-            return false;
         } else {
             // User has not liked the comment yet, so we add the like
             await updateDoc(commentRef, {
                 likeCount: commentData.likeCount + 1,
                 likedBy: arrayUnion(currentUser.id),
             });
-            return true;
         }
     } catch (error) {
         console.error("Error toggling like:", error);
+        return -1;
     }
 };
 

@@ -15,7 +15,11 @@ const EachComment = ({ item, songId, currentUser }) => {
         setUpdatingLikes(true);
         setIsLiked(!isLiked);
         try {
-            await toggleCommentLike({ item, songId, currentUser });
+            if (
+                (await toggleCommentLike({ item, songId, currentUser })) == -1
+            ) {
+                setIsLiked(!isLiked);
+            }
         } catch (err) {
             console.error("Error in liking the comment");
         } finally {
