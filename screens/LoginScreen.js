@@ -1,13 +1,13 @@
 import {
     Text,
     SafeAreaView,
-    Pressable,
     View,
     ImageBackground,
     Image,
     StyleSheet,
     ActivityIndicator,
     Alert,
+    TouchableOpacity,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import {
@@ -161,7 +161,8 @@ const LoginScreen = () => {
                             locations={[0, 0.22, 0.4, 0.62, 1]}
                             style={styles.gradientBottom}
                         >
-                            <Pressable
+                            <TouchableOpacity
+                                activeOpacity={0.6}
                                 onPress={() => promptAsync()}
                                 style={styles.button}
                             >
@@ -172,7 +173,7 @@ const LoginScreen = () => {
                                 <Text style={styles.buttonText}>
                                     Log in with Spotify
                                 </Text>
-                            </Pressable>
+                            </TouchableOpacity>
                         </LinearGradient>
                     </SafeAreaView>
                 </View>

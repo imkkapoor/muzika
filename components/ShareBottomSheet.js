@@ -1,4 +1,10 @@
-import { Pressable, Share, StyleSheet, Text, View } from "react-native";
+import {
+    Share,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import React, { useContext, useRef } from "react";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { MinusCircle, PaperPlaneTilt } from "phosphor-react-native";
@@ -8,7 +14,7 @@ import { addSongIdToNotInterested } from "../functions/dbFunctions";
 const ShareBottomSheet = ({ isVisible, onClose, url, name, itemId }) => {
     const { currentUser } = useContext(User);
     const sheetRef = useRef(null);
-    const snapPoints = ["23%"];
+    const snapPoints = ["27%"];
     const shareSong = async (url) => {
         try {
             await Share.share({
@@ -35,7 +41,8 @@ const ShareBottomSheet = ({ isVisible, onClose, url, name, itemId }) => {
             }}
         >
             <BottomSheetView style={styles.contentContainer}>
-                <Pressable
+                <TouchableOpacity
+                    activeOpacity={0.6}
                     onPress={() => shareSong(url)}
                     style={{
                         margin: 15,
@@ -53,8 +60,9 @@ const ShareBottomSheet = ({ isVisible, onClose, url, name, itemId }) => {
                             <Text style={styles.button}>Share</Text>
                         </View>
                     </View>
-                </Pressable>
-                <Pressable
+                </TouchableOpacity>
+                <TouchableOpacity
+                    activeOpacity={0.6}
                     onPress={() => {
                         addSongIdToNotInterested({ itemId, currentUser });
                     }}
@@ -75,7 +83,7 @@ const ShareBottomSheet = ({ isVisible, onClose, url, name, itemId }) => {
                             <Text style={styles.button}>Not interested</Text>
                         </View>
                     </View>
-                </Pressable>
+                </TouchableOpacity>
             </BottomSheetView>
         </BottomSheet>
     );

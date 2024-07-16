@@ -1,5 +1,4 @@
 import {
-    Pressable,
     SafeAreaView,
     StyleSheet,
     Text,
@@ -18,7 +17,7 @@ import { User } from "../UserContext";
 const ChooseGenresScreen = () => {
     const [selectedGenres, setSelectedGenres] = useState([]);
     const navigation = useNavigation();
-    const {currentUser} = useContext(User)
+    const { currentUser } = useContext(User);
 
     const handleGenrePress = (genre) => {
         if (selectedGenres.includes(genre.name)) {
@@ -105,7 +104,8 @@ const ChooseGenresScreen = () => {
 
                 <View>
                     {selectedGenres.length > 0 ? (
-                        <Pressable
+                        <TouchableOpacity
+                            activeOpacity={0.6}
                             style={styles.continueBox}
                             onPress={handleGenreStorage}
                         >
@@ -115,9 +115,10 @@ const ChooseGenresScreen = () => {
                                 color="white"
                                 weight="bold"
                             />
-                        </Pressable>
+                        </TouchableOpacity>
                     ) : (
-                        <Pressable
+                        <TouchableOpacity
+                            activeOpacity={0.6}
                             style={styles.continueBox}
                             onPress={() => {
                                 navigation.replace("Main");
@@ -131,7 +132,7 @@ const ChooseGenresScreen = () => {
                                 color="white"
                                 weight="bold"
                             />
-                        </Pressable>
+                        </TouchableOpacity>
                     )}
                 </View>
             </SafeAreaView>

@@ -3,10 +3,10 @@ import {
     Text,
     SafeAreaView,
     View,
-    Pressable,
     ActivityIndicator,
     FlatList,
     Image,
+    TouchableOpacity,
 } from "react-native";
 import React, {
     useCallback,
@@ -217,14 +217,6 @@ const HomeScreen = () => {
         );
     };
 
-    if (loading) {
-        return (
-            <View style={styles.loading}>
-                <ActivityIndicator size="small" color="white" />
-            </View>
-        );
-    }
-
     if (error) {
         return (
             <View
@@ -260,14 +252,8 @@ const HomeScreen = () => {
                         >
                             /múzika
                         </Text>
-                        {/* <Pressable
-                        onPress={() => {
-                            navigation.navigate("ChoosePlaylist");
-                        }}
-                    >
-                        <Text style={{ color: "white" }}>Choose Playlist</Text>
-                    </Pressable> */}
-                        <Pressable
+                        <TouchableOpacity
+                            activeOpacity={0.6}
                             onPress={() => {
                                 navigation.navigate("Profile");
                             }}
@@ -280,26 +266,32 @@ const HomeScreen = () => {
                                     borderRadius: 100,
                                 }}
                             ></Image>
-                        </Pressable>
+                        </TouchableOpacity>
                     </View>
-
-                    <FlatList
-                        data={recommendations}
-                        keyExtractor={keyExtractor}
-                        ref={flatListRef}
-                        onViewableItemsChanged={onViewableItemsChanged}
-                        showsVerticalScrollIndicator={false}
-                        viewabilityConfig={{ itemVisiblePercentThreshold: 70 }}
-                        renderItem={renderItem}
-                        contentContainerStyle={{ paddingBottom: 150 }}
-                        ItemSeparatorComponent={itemSeparatorComponent}
-                        onEndReached={onEndReached}
-                        snapToInterval={628.5}
-                        snapToAlignment="start"
-                        decelerationRate="fast"
-                        ListFooterComponent={listFooterComponent}
-                        onEndReachedThreshold={0.1}
-                    />
+                    {loading ? (
+                        <View style={styles.loading}>
+                            <ActivityIndicator size="small" color="white" />
+                        </View>
+                    ) : (
+                        <FlatList
+                            data={recommendations}
+                            keyExtractor={keyExtractor}
+                            ref={flatListRef}
+                            onViewableItemsChanged={onViewableItemsChanged}
+                            showsVerticalScrollIndicator={false}
+                            viewabilityConfig={{
+                                itemVisiblePercentThreshold: 70,
+                            }}
+                            renderItem={renderItem}
+                            contentContainerStyle={{ paddingBottom: 150 }}
+                            ItemSeparatorComponent={itemSeparatorComponent}
+                            onEndReached={onEndReached}
+                            snapToInterval={628.5}
+                            snapToAlignment="start"
+                            decelerationRate="fast"
+                            ListFooterComponent={listFooterComponent}
+                        />
+                    )}
                 </SafeAreaView>
                 <ShareBottomSheet
                     isVisible={isBottomSheetVisible}
@@ -312,7 +304,6 @@ const HomeScreen = () => {
                     isVisible={isCommentSectionVisible}
                     onClose={() => setIsCommentSectionVisible(false)}
                     songId={activeSongId}
-                    songName={activeSongName}
                 />
 
                 {waitingPlaylistAddition && <LoadingFullScreen />}
@@ -339,7 +330,7 @@ const styles = StyleSheet.create({
         display: "flex",
         alignContent: "center",
         justifyContent: "center",
-        height: "100%",
+        height: "90%",
     },
     bottomGradient: {
         flex: 1,

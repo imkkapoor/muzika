@@ -7,7 +7,6 @@ import {
     Image,
     SafeAreaView,
     StyleSheet,
-    Pressable,
     ActivityIndicator,
     Modal,
     TextInput,
@@ -18,15 +17,13 @@ import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { useNavigation } from "@react-navigation/native";
 import LoadingFullScreen from "../components/LoadingFullScreen";
-import {
-    getAccessToken,
-} from "../functions/localStorageFunctions";
+import { getAccessToken } from "../functions/localStorageFunctions";
 import { User } from "../UserContext";
 
 const ChoosePlaylistScreen = () => {
     const navigation = useNavigation();
     const [playlists, setPlaylists] = useState([]);
-    const {currentUser} = useContext(User)
+    const { currentUser } = useContext(User);
     const [isLoading, setIsLoading] = useState(true);
     const [waitingPlaylistAddition, setWaitingPlaylistAddition] =
         useState(false);
@@ -59,8 +56,6 @@ const ChoosePlaylistScreen = () => {
             console.error(error);
         }
     };
-
-    
 
     const storeUserDataInFirestore = async (
         userProfile,
@@ -165,6 +160,7 @@ const ChoosePlaylistScreen = () => {
     const renderItem = useCallback(
         ({ item }) => (
             <TouchableOpacity
+                activeOpacity={0.6}
                 onPress={() => selectPlaylist(item.id, item.name)}
             >
                 <View style={styles.eachPlaylistContainer}>
@@ -202,14 +198,17 @@ const ChoosePlaylistScreen = () => {
                     <Text style={styles.optionOne}>
                         Want to create a new playlist?
                     </Text>
-                    <Pressable style={styles.newPlaylistButtonContainer}>
+                    <TouchableOpacity
+                        activeOpacity={0.6}
+                        style={styles.newPlaylistButtonContainer}
+                    >
                         <Text
                             style={styles.newPlaylistButtonText}
                             onPress={handleCreateNewPlaylist}
                         >
                             Tap right here!
                         </Text>
-                    </Pressable>
+                    </TouchableOpacity>
                 </View>
                 <View style={styles.textBox}>
                     <Text style={styles.optionTwo}>
@@ -253,7 +252,8 @@ const ChoosePlaylistScreen = () => {
                                 onChangeText={setNewPlaylistName}
                             />
                             <View style={styles.buttonContainer}>
-                                <Pressable
+                                <TouchableOpacity
+                                    activeOpacity={0.6}
                                     onPress={() => setIsModalVisible(false)}
                                     style={[
                                         styles.buttonBox,
@@ -263,15 +263,16 @@ const ChoosePlaylistScreen = () => {
                                     <Text style={styles.buttonText}>
                                         Cancel
                                     </Text>
-                                </Pressable>
-                                <Pressable
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    activeOpacity={0.6}
                                     onPress={handleModalSubmit}
                                     style={styles.buttonBox}
                                 >
                                     <Text style={styles.buttonText}>
                                         Submit
                                     </Text>
-                                </Pressable>
+                                </TouchableOpacity>
                             </View>
                         </View>
                     </View>

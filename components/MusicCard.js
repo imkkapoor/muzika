@@ -1,4 +1,11 @@
-import { Alert, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+    Alert,
+    Image,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import React, {
     memo,
     useCallback,
@@ -20,6 +27,7 @@ import { db } from "../firebase";
 import { getPlaylistId } from "../functions/dbFunctions";
 import { getAccessToken } from "../functions/localStorageFunctions";
 import { User } from "../UserContext";
+import * as Haptics from "expo-haptics";
 
 const MusicCard = ({
     item,
@@ -126,10 +134,12 @@ const MusicCard = ({
     }, [isPlaying, playSound, pauseSound]);
 
     const handleBottomSheetVisible = useCallback(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         setIsBottomSheetVisible(true);
     }, [setIsBottomSheetVisible]);
 
     const handleCommmentsVisibility = useCallback(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         setIsCommentSectionVisible(true);
     }, [setIsCommentSectionVisible]);
 
@@ -167,6 +177,7 @@ const MusicCard = ({
     };
 
     const addToPlaylist = async () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
         setWaitingPlaylistAddition(true);
         const playlistId = await getPlaylistId(currentUser);
         const accessToken = await getAccessToken();
@@ -209,7 +220,7 @@ const MusicCard = ({
 
     return (
         <View style={styles.container}>
-            <Pressable onPress={togglePlayAndPause}>
+            <TouchableOpacity activeOpacity={1} onPress={togglePlayAndPause}>
                 <View style={styles.artworkContainer}>
                     <Image
                         style={styles.albumCover}
@@ -223,7 +234,7 @@ const MusicCard = ({
                         )}
                     </View>
                 </View>
-            </Pressable>
+            </TouchableOpacity>
             <View style={styles.infoContainer}>
                 {item.name.length > maxTitleLength ? (
                     <Marquee speed={0.3} spacing={25} style={{ width: 260 }}>
@@ -241,32 +252,42 @@ const MusicCard = ({
                         >
                             <Text style={styles.artist}>{artistNames}</Text>
                         </Marquee>
-                        <Pressable onPress={handleBottomSheetVisible}>
+                        <TouchableOpacity
+                            activeOpacity={0.6}
+                            onPress={handleBottomSheetVisible}
+                        >
                             <DotsThree weight="bold" color="white" size={36} />
-                        </Pressable>
+                        </TouchableOpacity>
                     </View>
                 ) : (
                     <View style={styles.shareAndArtist}>
                         <Text style={styles.artist}>{artistNames}</Text>
-                        <Pressable onPress={handleBottomSheetVisible}>
+                        <TouchableOpacity
+                            activeOpacity={0.6}
+                            onPress={handleBottomSheetVisible}
+                        >
                             <DotsThree weight="bold" color="white" size={36} />
-                        </Pressable>
+                        </TouchableOpacity>
                     </View>
                 )}
             </View>
             <View style={styles.commentsAndAdd}>
-                <Pressable
+                <TouchableOpacity
+                    activeOpacity={0.6}
                     style={styles.commentPreview}
                     onPress={handleCommmentsVisibility}
                 >
                     <Text style={styles.comment}>Comments</Text>
-                </Pressable>
+                </TouchableOpacity>
                 {isAdded ? (
                     <CheckCircle color="#1ED760" size={37} weight="fill" />
                 ) : (
-                    <Pressable onPress={addToPlaylist}>
+                    <TouchableOpacity
+                        activeOpacity={0.6}
+                        onPress={addToPlaylist}
+                    >
                         <PlusCircle color="white" size={37} />
-                    </Pressable>
+                    </TouchableOpacity>
                 )}
             </View>
             <View style={styles.progressBar}>

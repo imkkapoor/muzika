@@ -4,9 +4,9 @@ import {
     SafeAreaView,
     View,
     Image,
-    Pressable,
     FlatList,
     ActivityIndicator,
+    TouchableOpacity,
 } from "react-native";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { CaretLeft } from "phosphor-react-native";
@@ -18,8 +18,8 @@ import RecentlyAddedCard from "../components/RecentlyAddedCard";
 import { User } from "../UserContext";
 
 const ProfileScreen = () => {
-    const maxNameLength = 12;
-    const maxArtistNameLength = 14;
+    const maxNameLength = 10;
+    const maxArtistNameLength = 13;
     const navigation = useNavigation();
     const [recentlyAddedTracks, setRecentlyAddedTracks] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -72,14 +72,15 @@ const ProfileScreen = () => {
         >
             <SafeAreaView>
                 <View style={styles.titleBar}>
-                    <Pressable
+                    <TouchableOpacity
+                        activeOpacity={0.6}
                         onPress={() => {
                             navigation.navigate("Main");
                         }}
                     >
                         <CaretLeft size={24} color="white" />
-                    </Pressable>
-                    <Text style={styles.title}>Profile</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.title}>/múzika/profile</Text>
                 </View>
                 <View style={styles.personalInfoContainer}>
                     <Image
