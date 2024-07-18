@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "spreel",
-    "slug": "spreel",
+    "name": "múzika",
+    "slug": "múzika",
     "version": "1.0.0",
     "scheme": "exp://192.168.1.66:8081",
     "orientation": "portrait",
