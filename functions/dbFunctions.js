@@ -204,6 +204,53 @@ const toggleCommentLike = async ({ item, songId, currentUser }) => {
     }
 };
 
+const addReply = async ({
+    songId,
+    commentId,
+    reply,
+    currentUserId,
+    name,
+    imageLink,
+    setPostingReply,
+    setReply,
+}) => {
+    setPostingReply(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (!reply.trim()) {
+        setPostingReply(false);
+        return;
+    }
+    try {
+        Keyboard.dismiss();
+        setReply("");
+
+        const commentDocRef = doc(db, "songs", songId, "comments", commentId);
+        const commentDoc = await getDoc(commentDocRef);
+        const replyId = await generateUniqueId();
+        const replyData = {
+            userId: currentUserId,
+            username: name,
+            content: reply,
+            likeCount: 0,
+            likedBy: [],
+            timestamp: Timestamp.now(),
+            profileImage: imageLink,
+        };
+
+        if (commentDoc.exists()) {
+            const repliesCollectionRef = collection(commentDocRef, "replies");
+            await setDoc(doc(repliesCollectionRef, replyId), replyData);
+        } else {
+            console.error("Error: Comment document does not exist.");
+        }
+        return replyId;
+    } catch (err) {
+        console.error("Error in adding the reply:", err);
+    } finally {
+        setPostingReply(false);
+    }
+};
+
 export {
     getPlaylistId,
     checkUserExists,
@@ -212,4 +259,5 @@ export {
     addComment,
     getComments,
     toggleCommentLike,
+    addReply,
 };

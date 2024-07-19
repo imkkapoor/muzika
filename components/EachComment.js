@@ -1,7 +1,15 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+    FlatList,
+    Image,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import React, { useState } from "react";
 import { Heart } from "phosphor-react-native";
 import { toggleCommentLike } from "../functions/dbFunctions";
+import EachReply from "./EachReply";
 
 const EachComment = ({ item, songId, currentUser }) => {
     const [updatingLikes, setUpdatingLikes] = useState(false);
@@ -9,6 +17,8 @@ const EachComment = ({ item, songId, currentUser }) => {
         item.likedBy.includes(currentUser.id)
     );
     const [likeCount, setLikeCount] = useState(item.likeCount);
+
+    const data = [{}, {}, {}];
     const changeLikedState = async () => {
         if (updatingLikes) {
             return;
@@ -29,6 +39,10 @@ const EachComment = ({ item, songId, currentUser }) => {
             setUpdatingLikes(false);
         }
     };
+
+    const renderItem = ({ item }) => {
+        return <EachReply />;
+    };
     return (
         <View style={styles.eachCommentContainer}>
             <Image
@@ -38,11 +52,24 @@ const EachComment = ({ item, songId, currentUser }) => {
             <View style={styles.nameAndComment}>
                 <Text style={styles.name}>{item.username}</Text>
                 <Text style={styles.comment}>{item.content}</Text>
+                <TouchableOpacity style={styles.reply}>
+                    {/* <Text>Reply</Text> */}
+                </TouchableOpacity>
+                <View style={styles.replyContainer}>
+                    {/* <Text>Reply Container</Text> */}
+                    <FlatList
+                        data={data}
+                        renderItem={renderItem}
+                        ItemSeparatorComponent={<View style={{ height: 20 }} />}
+                    />
+                    {/* <EachReply /> */}
+                </View>
             </View>
             <View style={styles.likeContainer}>
                 <TouchableOpacity
                     onPress={changeLikedState}
                     style={{ padding: 3 }}
+                    activeOpacity={0.6}
                 >
                     {isLiked ? (
                         <Heart size={17} color="red" weight="fill" />
@@ -63,7 +90,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         display: "flex",
         justifyContent: "space-between",
-        alignItems: "center",
+        alignItems: "flex-start",
         width: 336,
     },
     profilePicture: {
@@ -79,6 +106,10 @@ const styles = StyleSheet.create({
         color: "white",
         marginTop: 4,
     },
+    replyContainer: {
+        marginTop: 20,
+    },
+    reply: { marginTop: 6 },
     likeContainer: {
         display: "flex",
         alignContent: "center",

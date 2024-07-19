@@ -2,6 +2,7 @@
   "expo": {
     "name": "múzika",
     "slug": "múzika",
+    "description": "Get you recommendations up",
     "version": "1.0.0",
     "scheme": "exp://192.168.1.66:8081",
     "orientation": "portrait",
@@ -13,7 +14,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.imkkapoor.muzika"
     },
     "android": {
       "adaptiveIcon": {
@@ -23,6 +25,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c1fce4d3-7e6f-493e-876f-39e1c3151db6"
+      }
+    },
+    "owner": "imkkapoor"
   }
 }
