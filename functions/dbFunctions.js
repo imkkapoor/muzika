@@ -9,6 +9,8 @@ import {
     query,
     getDocs,
     arrayRemove,
+    where,
+    runTransaction,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import * as Crypto from "expo-crypto";
@@ -36,7 +38,6 @@ const checkUserExists = async (spotifyUserId) => {
     const userDocRef = doc(db, "users", spotifyUserId);
     try {
         const userDoc = await getDoc(userDocRef);
-        console.log("User exists:", userDoc.exists());
         return userDoc.exists(); // true if the user exists, false otherwise
     } catch (error) {
         console.error("Error checking user existence:", error);
@@ -127,6 +128,7 @@ const addComment = async ({
             likedBy: [],
             timestamp: Timestamp.now(),
             profileImage: imageLink,
+            replyCount: 0,
         };
 
         if (songDoc.exists()) {
@@ -163,7 +165,6 @@ const getComments = async (songId) => {
                 ...doc.data(),
             });
         });
-
         return comments;
     } catch (err) {
         console.error("Error fetching comments", err);
@@ -186,13 +187,11 @@ const toggleCommentLike = async ({ item, songId, currentUser }) => {
         const likedBy = commentData.likedBy || [];
 
         if (likedBy.includes(currentUser.id)) {
-            // User has already liked the comment, so we remove the like
             await updateDoc(commentRef, {
                 likeCount: commentData.likeCount - 1,
                 likedBy: arrayRemove(currentUser.id),
             });
         } else {
-            // User has not liked the comment yet, so we add the like
             await updateDoc(commentRef, {
                 likeCount: commentData.likeCount + 1,
                 likedBy: arrayUnion(currentUser.id),
@@ -225,7 +224,6 @@ const addReply = async ({
         setReply("");
 
         const commentDocRef = doc(db, "songs", songId, "comments", commentId);
-        const commentDoc = await getDoc(commentDocRef);
         const replyId = await generateUniqueId();
         const replyData = {
             userId: currentUserId,
@@ -237,17 +235,84 @@ const addReply = async ({
             profileImage: imageLink,
         };
 
-        if (commentDoc.exists()) {
+        await runTransaction(db, async (transaction) => {
+            const commentDoc = await transaction.get(commentDocRef);
+            if (!commentDoc.exists()) {
+                throw new Error("Comment document does not exist.");
+            }
+
             const repliesCollectionRef = collection(commentDocRef, "replies");
-            await setDoc(doc(repliesCollectionRef, replyId), replyData);
-        } else {
-            console.error("Error: Comment document does not exist.");
-        }
+            transaction.set(doc(repliesCollectionRef, replyId), replyData);
+
+            const newReplyCount = (commentDoc.data().replyCount || 0) + 1;
+            transaction.update(commentDocRef, { replyCount: newReplyCount });
+        });
         return replyId;
     } catch (err) {
         console.error("Error in adding the reply:", err);
     } finally {
         setPostingReply(false);
+    }
+};
+
+export const getReplies = async ({ songId, commentId }) => {
+    if (!songId || !commentId) {
+        console.error("Missing songId or commentId in getReplies:", {
+            songId,
+            commentId,
+        });
+        return [];
+    }
+    const replies = [];
+    try {
+        const repliesCollectionRef = collection(
+            db,
+            "songs",
+            songId,
+            "comments",
+            commentId,
+            "replies"
+        );
+        const q = query(repliesCollectionRef);
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+            replies.push({ id: doc.id, ...doc.data() });
+        });
+    } catch (error) {
+        console.error("Failed to fetch replies:", error);
+    }
+    return replies;
+};
+const toggleReplyLike = async ({ item, songId, commentId, currentUser }) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try {
+        const replyRef = doc(
+            db,
+            `songs/${songId}/comments/${commentId}/replies/${item.id}`
+        );
+        const replyDoc = await getDoc(replyRef);
+        if (!replyDoc.exists()) {
+            console.error("Reply does not exist!");
+            return;
+        }
+
+        const replyData = replyDoc.data();
+        const likedBy = replyData.likedBy || [];
+
+        if (likedBy.includes(currentUser.id)) {
+            await updateDoc(replyRef, {
+                likeCount: replyData.likeCount - 1,
+                likedBy: arrayRemove(currentUser.id),
+            });
+        } else {
+            await updateDoc(replyRef, {
+                likeCount: replyData.likeCount + 1,
+                likedBy: arrayUnion(currentUser.id),
+            });
+        }
+    } catch (error) {
+        console.error("Error toggling like:", error);
+        return -1;
     }
 };
 
@@ -260,4 +325,5 @@ export {
     getComments,
     toggleCommentLike,
     addReply,
+    toggleReplyLike,
 };

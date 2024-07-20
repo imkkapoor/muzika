@@ -10,18 +10,22 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import BottomSheet, { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { PaperPlaneRight } from "phosphor-react-native";
 import { User } from "../UserContext";
-import { addComment, getComments } from "../functions/dbFunctions";
+import { addComment, addReply, getComments } from "../functions/dbFunctions";
 import EachComment from "./EachComment";
 
 const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
     const sheetRef = useRef(null);
+    const inputRef = useRef(null);
     const [comment, setComment] = useState("");
     const [commentsToDisplay, setCommentsToDisplay] = useState([]);
     const [postingComment, setPostingComment] = useState(false);
     const [loadingComments, setLoadingComments] = useState(true);
     const { currentUser } = useContext(User);
     const snapPoints = ["75%"];
-
+    const [isReplying, setIsReplying] = useState(false);
+    const [replyToCommentId, setReplyToCommentId] = useState(null);
+    const [inputPlaceholder, setInputPlaceholder] =
+        useState("Add a comment...");
     useEffect(() => {
         setComment("");
     }, [songId]);
@@ -45,8 +49,48 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
     };
 
     const renderItem = ({ item }) => (
-        <EachComment item={item} songId={songId} currentUser={currentUser} />
+        <EachComment
+            item={item}
+            songId={songId}
+            currentUser={currentUser}
+            inputRef={inputRef}
+            setInputPlaceholder={setInputPlaceholder}
+            setIsReplying={setIsReplying}
+            setReplyToCommentId={setReplyToCommentId}
+        />
     );
+
+    const handleInputBlur = () => {
+        setReplyToCommentId(null);
+        setIsReplying(false);
+        setInputPlaceholder("Add a comment...");
+    };
+
+    const handleSubmit = () => {
+        if (isReplying) {
+            addReply({
+                reply: comment,
+                songId: songId,
+                commentId: replyToCommentId,
+                currentUserId: currentUser.id,
+                name: currentUser.display_name,
+                imageLink: currentUser?.images[1].url,
+                setPostingReply: setPostingComment,
+                setReply: setComment,
+            });
+        } else {
+            addComment({
+                comment: comment,
+                songId: songId,
+                songName: songName,
+                currentUserId: currentUser.id,
+                name: currentUser.display_name,
+                imageLink: currentUser?.images[1].url,
+                setPostingComment: setPostingComment,
+                setComment: setComment,
+            });
+        }
+    };
     return (
         <BottomSheet
             ref={sheetRef}
@@ -128,26 +172,15 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
                 <View style={styles.inputContainer}>
                     <View style={styles.borderBox}>
                         <BottomSheetTextInput
+                            ref={inputRef}
                             style={styles.commentInput}
                             value={comment}
                             onChangeText={setComment}
-                            placeholder="Add a comment..."
+                            placeholder={inputPlaceholder}
                             placeholderTextColor="#979797"
+                            onBlur={handleInputBlur}
                         />
-                        <TouchableOpacity
-                            onPress={() => {
-                                addComment({
-                                    comment: comment,
-                                    songId: songId,
-                                    songName: songName,
-                                    currentUserId: currentUser.id,
-                                    name: currentUser.display_name,
-                                    imageLink: currentUser?.images[1].url,
-                                    setPostingComment: setPostingComment,
-                                    setComment: setComment,
-                                });
-                            }}
-                        >
+                        <TouchableOpacity onPress={handleSubmit}>
                             <PaperPlaneRight
                                 style={styles.sendButton}
                                 color="#979797"

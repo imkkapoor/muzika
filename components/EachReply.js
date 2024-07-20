@@ -1,8 +1,41 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { Heart } from "phosphor-react-native";
+import { toggleReplyLike } from "../functions/dbFunctions";
 
-const EachReply = () => {
+const EachReply = ({ item, currentUser, commentId, songId }) => {
+    const [isLiked, setIsLiked] = useState(
+        item.likedBy.includes(currentUser.id)
+    );
+    const [likeCount, setLikeCount] = useState(item.likeCount);
+    const [updatingLikes, setUpdatingLikes] = useState(false);
+
+    const changeLikedState = async () => {
+        if (updatingLikes) {
+            return;
+        }
+        setUpdatingLikes(true);
+        setIsLiked(!isLiked);
+        setLikeCount(!isLiked ? likeCount + 1 : likeCount - 1);
+        try {
+            if (
+                (await toggleReplyLike({
+                    item,
+                    songId,
+                    commentId,
+                    currentUser,
+                })) == -1
+            ) {
+                setIsLiked(!isLiked);
+                setLikeCount(likeCount - 1);
+            }
+        } catch (err) {
+            console.error("Error in liking the reply", err);
+        } finally {
+            setUpdatingLikes(false);
+        }
+    };
+
     return (
         <View style={styles.eachReplyContainer}>
             <Image
@@ -12,26 +45,22 @@ const EachReply = () => {
                 style={styles.profilePicture}
             />
             <View style={styles.nameAndReply}>
-                <Text style={styles.name}>Test</Text>
-                <Text style={styles.reply}>Test</Text>
-                {/* <TouchableOpacity style={styles.reply}>
-                    <Text>Reply</Text>
-                </TouchableOpacity> */}
+                <Text style={styles.name}>{item.username}</Text>
+                <Text style={styles.reply}>{item.content}</Text>
             </View>
             <View style={styles.replyContainer}>
                 <TouchableOpacity
-                    // onPress={changeLikedState}
+                    onPress={changeLikedState}
                     style={{ padding: 3 }}
                     activeOpacity={0.6}
                 >
-                    {/* {isLiked ? (
+                    {isLiked ? (
                         <Heart size={17} color="red" weight="fill" />
                     ) : (
                         <Heart size={17} color="white" />
-                    )} */}
-                    <Heart size={17} color="white" />
+                    )}
                 </TouchableOpacity>
-                <Text style={styles.likeCount}>1</Text>
+                <Text style={styles.likeCount}>{likeCount}</Text>
             </View>
         </View>
     );
@@ -48,11 +77,11 @@ const styles = StyleSheet.create({
         width: 277,
     },
     profilePicture: {
-        height: 45,
-        width: 45,
+        height: 30,
+        width: 30,
         borderRadius: 100,
     },
-    nameAndReply: { width: 180 },
+    nameAndReply: { width: 195 },
     name: { fontSize: 12, fontFamily: "Inter-Bold", color: "white" },
     reply: {
         fontFamily: "Inter-Regular",

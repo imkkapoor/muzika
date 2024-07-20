@@ -43,7 +43,7 @@ const ProfileScreen = () => {
                 const recentlyAddedTracks = await getTracks(recentAdds);
                 setRecentlyAddedTracks(recentlyAddedTracks);
             } else {
-                console.log("No such user document!");
+                console.error("No such user document!");
             }
         } catch (err) {
             console.error("Error in fetching recent adds:", err);

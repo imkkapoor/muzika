@@ -69,7 +69,6 @@ const HomeScreen = () => {
             const data = await response.json();
             setTopSongs(data.items);
         } catch (err) {
-            console.log(err);
             setError(err.message);
         }
     };
@@ -134,7 +133,6 @@ const HomeScreen = () => {
                     return [...prevRecommendations, ...uniqueTracks];
                 });
             } catch (err) {
-                console.log(err);
                 setError(err.message);
             } finally {
                 setLoading(false);

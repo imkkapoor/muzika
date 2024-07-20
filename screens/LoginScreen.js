@@ -71,7 +71,7 @@ const LoginScreen = () => {
                 navigation.replace("ChoosePlaylist");
             } else navigation.replace("Main");
         } catch (err) {
-            console.log(err.message);
+            console.error("Error in checking user:", err);
         }
     };
 

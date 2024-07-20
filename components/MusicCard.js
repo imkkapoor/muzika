@@ -169,7 +169,7 @@ const MusicCard = ({
                     recentAdds: recentAdds,
                 });
             } else {
-                console.log("No such user document!");
+                console.error("No such user document!");
             }
         } catch (err) {
             console.error("Error in adding to recent adds:", err);
@@ -207,7 +207,6 @@ const MusicCard = ({
             }
 
             const data = await response.json();
-            console.log("Track added to playlist:", data);
             addSongToRecentAdds(currentUser);
             setIsAdded(true);
         } catch (error) {
