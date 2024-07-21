@@ -7,7 +7,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import React, { useState } from "react";
+import React, {  useState } from "react";
 import { Heart } from "phosphor-react-native";
 import { getReplies, toggleCommentLike } from "../functions/dbFunctions";
 import EachReply from "./EachReply";
@@ -129,22 +129,42 @@ const EachComment = ({
                         </View>
                     ))}
                 {item.replyCount > 0 && (
-                    <TouchableOpacity
-                        style={styles.toggleReplyView}
-                        onPress={fetchReplies}
+                    <View
+                        style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "flex-start",
+                            alignContent: "center",
+                            alignItems: "center",
+                            width: "100%",
+                        }}
                     >
-                        {repliesAreVisible ? (
-                            <Text style={styles.toggleReplyViewText}>
-                                Hide Replies
-                            </Text>
-                        ) : (
-                            <Text style={styles.toggleReplyViewText}>
-                                View Replies
-                            </Text>
-                        )}
-                    </TouchableOpacity>
+                        <View
+                            style={{
+                                borderWidth: 0.25,
+                                width: 30,
+                                marginTop: 8,
+                                borderColor: "#555555",
+                            }}
+                        ></View>
+                        <TouchableOpacity
+                            style={styles.toggleReplyView}
+                            onPress={fetchReplies}
+                        >
+                            {repliesAreVisible ? (
+                                <Text style={styles.toggleReplyViewText}>
+                                    Hide Replies
+                                </Text>
+                            ) : (
+                                <Text style={styles.toggleReplyViewText}>
+                                    View Replies
+                                </Text>
+                            )}
+                        </TouchableOpacity>
+                    </View>
                 )}
             </View>
+
             <View style={styles.likeContainer}>
                 <TouchableOpacity
                     onPress={changeLikedState}
@@ -189,7 +209,7 @@ const styles = StyleSheet.create({
     replyContainer: {
         marginTop: 20,
     },
-    toggleReplyView: { marginTop: 8, marginLeft: 45 },
+    toggleReplyView: { marginTop: 8, marginLeft: 15 },
     toggleReplyViewText: {
         color: "#979797",
         fontSize: 12,
