@@ -57,6 +57,7 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
             setInputPlaceholder={setInputPlaceholder}
             setIsReplying={setIsReplying}
             setReplyToCommentId={setReplyToCommentId}
+            commentsToDisplay={commentsToDisplay}
         />
     );
 
@@ -89,6 +90,7 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
                 imageLink: currentUser?.images[1].url,
                 setPostingComment: setPostingComment,
                 setComment: setComment,
+                setCommentsToDisplay: setCommentsToDisplay,
             });
         }
     };

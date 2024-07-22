@@ -220,6 +220,7 @@ const addReply = async ({
     imageLink,
     setPostingReply,
     setReply,
+    setCommentsToDisplay,
 }) => {
     setPostingReply(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -230,7 +231,14 @@ const addReply = async ({
     try {
         Keyboard.dismiss();
         setReply("");
-
+        setCommentsToDisplay((prevComments) =>
+            prevComments.map((comment) => {
+                if (comment.id === commentId) {
+                    return { ...comment, replyCount: comment.replyCount + 1 };
+                }
+                return comment;
+            })
+        );
         const commentDocRef = doc(db, "songs", songId, "comments", commentId);
         const replyId = await generateUniqueId();
         const replyData = {
@@ -257,6 +265,14 @@ const addReply = async ({
         });
         return replyId;
     } catch (err) {
+        setCommentsToDisplay((prevComments) =>
+            prevComments.map((comment) => {
+                if (comment.id === commentId) {
+                    return { ...comment, replyCount: comment.replyCount - 1 };
+                }
+                return comment;
+            })
+        );
         console.error("Error in adding the reply:", err);
     } finally {
         setPostingReply(false);
