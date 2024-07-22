@@ -11,6 +11,7 @@ import {
     arrayRemove,
     where,
     runTransaction,
+    orderBy,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import * as Crypto from "expo-crypto";
@@ -106,6 +107,7 @@ const addComment = async ({
     imageLink,
     setPostingComment,
     setComment,
+    setCommentsToDisplay,
 }) => {
     setPostingComment(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -117,8 +119,6 @@ const addComment = async ({
         Keyboard.dismiss();
         setComment("");
 
-        const songDocRef = doc(db, "songs", songId);
-        const songDoc = await getDoc(songDocRef);
         const commentId = await generateUniqueId();
         const commentData = {
             userId: currentUserId,
@@ -130,7 +130,12 @@ const addComment = async ({
             profileImage: imageLink,
             replyCount: 0,
         };
-
+        setCommentsToDisplay((prevComments) => [
+            { ...commentData, id: commentId }, // Use a temporary localId for rendering
+            ...prevComments,
+        ]);
+        const songDocRef = doc(db, "songs", songId);
+        const songDoc = await getDoc(songDocRef);
         if (songDoc.exists()) {
             const commentsCollectionRef = collection(songDocRef, "comments");
             await setDoc(doc(commentsCollectionRef, commentId), commentData);
@@ -141,6 +146,9 @@ const addComment = async ({
         }
         return commentId;
     } catch (err) {
+        setCommentsToDisplay((prevComments) =>
+            prevComments.filter((c) => c.content !== comment)
+        );
         console.error("Error in adding the comment:", err);
     } finally {
         setPostingComment(false);
@@ -155,7 +163,7 @@ const getComments = async (songId) => {
             songId,
             "comments"
         );
-        const q = query(commentsCollectionRef);
+        const q = query(commentsCollectionRef, orderBy("timestamp", "desc"));
         const querySnapshot = await getDocs(q);
 
         const comments = [];

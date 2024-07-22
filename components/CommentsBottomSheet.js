@@ -31,10 +31,10 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
     }, [songId]);
 
     useEffect(() => {
-        if (isVisible && !postingComment) {
+        if (isVisible) {
             fetchComments(songId);
         }
-    }, [isVisible, postingComment]);
+    }, [isVisible]);
 
     const fetchComments = async (songId) => {
         setLoadingComments(true);
@@ -77,6 +77,7 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
                 imageLink: currentUser?.images[1].url,
                 setPostingReply: setPostingComment,
                 setReply: setComment,
+                setCommentsToDisplay: setCommentsToDisplay,
             });
         } else {
             addComment({
