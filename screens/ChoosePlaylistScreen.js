@@ -235,7 +235,7 @@ const ChoosePlaylistScreen = () => {
 
                 <Modal
                     transparent={true}
-                    animationType="slide"
+                    animationType="fade"
                     visible={isModalVisible}
                     onRequestClose={() => setIsModalVisible(false)}
                 >

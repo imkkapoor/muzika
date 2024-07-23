@@ -49,10 +49,17 @@ const setTokens = async (response) => {
     }
     AsyncStorage.setItem("expirationDate", expirationDate.toString());
 };
+
+const logout = async () => {
+    AsyncStorage.removeItem("accessToken");
+    AsyncStorage.removeItem("refreshToken");
+    AsyncStorage.removeItem("expirationDate");
+};
 export {
     getUserProfile,
     getAccessToken,
     getExpirationDate,
     getRefreshToken,
     setTokens,
+    logout,
 };
