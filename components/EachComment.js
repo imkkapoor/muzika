@@ -7,10 +7,16 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Heart } from "phosphor-react-native";
 import { getReplies, toggleCommentLike } from "../functions/dbFunctions";
 import EachReply from "./EachReply";
+
+const ReplyState = {
+    HIDDEN: "hidden",
+    VISIBLE: "visible",
+    LOAD_MORE: "load_more",
+};
 
 const EachComment = ({
     item,
@@ -27,7 +33,9 @@ const EachComment = ({
     );
     const [likeCount, setLikeCount] = useState(item.likeCount);
     const [replies, setReplies] = useState([]);
-    const [repliesAreVisible, setRepliesAreVisible] = useState(false);
+    const [repliesAreVisible, setRepliesAreVisible] = useState(
+        ReplyState.HIDDEN
+    );
     const [repliesAreLoading, setRepliesAreLoading] = useState(false);
     const commentId = item.id;
 
@@ -58,11 +66,28 @@ const EachComment = ({
         inputRef.current.focus();
     };
 
+    const getToggleText = () => {
+        switch (repliesAreVisible) {
+            case ReplyState.VISIBLE:
+                return "Hide Replies";
+            case ReplyState.LOAD_MORE:
+                return "Load More";
+            case ReplyState.HIDDEN:
+            default:
+                return "View Replies";
+        }
+    };
     const fetchReplies = async () => {
         try {
-            setRepliesAreLoading(true);
-            if (!repliesAreVisible) {
-                setRepliesAreVisible(!repliesAreVisible);
+            if (
+                repliesAreVisible === ReplyState.HIDDEN ||
+                repliesAreVisible === ReplyState.LOAD_MORE
+            ) {
+                setRepliesAreVisible(ReplyState.VISIBLE);
+                if (replies.length === item.replyCount) {
+                    return;
+                }
+                setRepliesAreLoading(true);
 
                 const data = await getReplies({
                     songId: songId,
@@ -70,7 +95,7 @@ const EachComment = ({
                 });
                 setReplies(data);
             } else {
-                setRepliesAreVisible(!repliesAreVisible);
+                setRepliesAreVisible(ReplyState.HIDDEN);
             }
         } catch (err) {
             console.error("Error fetching replies:", err);
@@ -78,6 +103,17 @@ const EachComment = ({
             setRepliesAreLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (item.replies) {
+            setReplies([...item.replies, ...replies]);
+            if (item.replyCount > 1) {
+                setRepliesAreVisible(ReplyState.LOAD_MORE);
+            } else {
+                setRepliesAreVisible(ReplyState.VISIBLE);
+            }
+        }
+    }, [item.replies]);
 
     const renderItem = ({ item }) => {
         return (
@@ -89,6 +125,8 @@ const EachComment = ({
             />
         );
     };
+
+    const keyExtractor = useCallback((item) => {item.id}, []);
     return (
         <View style={styles.eachCommentContainer}>
             <Image
@@ -104,30 +142,35 @@ const EachComment = ({
                 >
                     <Text style={styles.ReplyToACommentText}>Reply</Text>
                 </TouchableOpacity>
-                {repliesAreVisible &&
-                    (repliesAreLoading ? (
-                        <ActivityIndicator
-                            size="small"
-                            color="white"
-                            style={{
-                                display: "flex",
-                                alignItems: "center",
-                                alignContent: "center",
-                                justifyContent: "center",
-                                height: 60,
-                            }}
+                {repliesAreVisible !== ReplyState.HIDDEN && (
+                    <View style={styles.replyContainer}>
+                        <FlatList
+                            data={replies}
+                            renderItem={renderItem}
+                            keyExtractor={keyExtractor}
+                            ItemSeparatorComponent={
+                                <View style={{ height: 20 }} />
+                            }
+                            
+                            ListFooterComponent={
+                                repliesAreLoading && (
+                                    <ActivityIndicator
+                                        size="small"
+                                        color="white"
+                                        style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            alignContent: "center",
+                                            justifyContent: "center",
+                                            height: 60,
+                                        }}
+                                    />
+                                )
+                            }
                         />
-                    ) : (
-                        <View style={styles.replyContainer}>
-                            <FlatList
-                                data={replies}
-                                renderItem={renderItem}
-                                ItemSeparatorComponent={
-                                    <View style={{ height: 20 }} />
-                                }
-                            />
-                        </View>
-                    ))}
+                    </View>
+                )}
+
                 {item.replyCount > 0 && (
                     <View
                         style={{
@@ -151,15 +194,9 @@ const EachComment = ({
                             style={styles.toggleReplyView}
                             onPress={fetchReplies}
                         >
-                            {repliesAreVisible ? (
-                                <Text style={styles.toggleReplyViewText}>
-                                    Hide Replies
-                                </Text>
-                            ) : (
-                                <Text style={styles.toggleReplyViewText}>
-                                    View Replies
-                                </Text>
-                            )}
+                            <Text style={styles.toggleReplyViewText}>
+                                {getToggleText()}
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 )}

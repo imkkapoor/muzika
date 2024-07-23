@@ -105,14 +105,11 @@ const addComment = async ({
     currentUserId,
     name,
     imageLink,
-    setPostingComment,
     setComment,
     setCommentsToDisplay,
 }) => {
-    setPostingComment(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (!comment.trim()) {
-        setPostingComment(false);
         return;
     }
     try {
@@ -150,8 +147,6 @@ const addComment = async ({
             prevComments.filter((c) => c.content !== comment)
         );
         console.error("Error in adding the comment:", err);
-    } finally {
-        setPostingComment(false);
     }
 };
 
@@ -218,14 +213,11 @@ const addReply = async ({
     currentUserId,
     name,
     imageLink,
-    setPostingReply,
     setReply,
     setCommentsToDisplay,
 }) => {
-    setPostingReply(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (!reply.trim()) {
-        setPostingReply(false);
         return;
     }
     try {
@@ -274,8 +266,6 @@ const addReply = async ({
             })
         );
         console.error("Error in adding the reply:", err);
-    } finally {
-        setPostingReply(false);
     }
 };
 
@@ -297,7 +287,7 @@ export const getReplies = async ({ songId, commentId }) => {
             commentId,
             "replies"
         );
-        const q = query(repliesCollectionRef);
+        const q = query(repliesCollectionRef, orderBy("timestamp", "desc"));
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
             replies.push({ id: doc.id, ...doc.data() });

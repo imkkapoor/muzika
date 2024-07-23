@@ -6,7 +6,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import BottomSheet, { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { PaperPlaneRight } from "phosphor-react-native";
 import { User } from "../UserContext";
@@ -18,7 +18,6 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
     const inputRef = useRef(null);
     const [comment, setComment] = useState("");
     const [commentsToDisplay, setCommentsToDisplay] = useState([]);
-    const [postingComment, setPostingComment] = useState(false);
     const [loadingComments, setLoadingComments] = useState(true);
     const { currentUser } = useContext(User);
     const snapPoints = ["75%"];
@@ -61,6 +60,8 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
         />
     );
 
+    const keyExtractor = useCallback((item) => item.id, []);
+
     const handleInputBlur = () => {
         setReplyToCommentId(null);
         setIsReplying(false);
@@ -69,6 +70,30 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
 
     const handleSubmit = () => {
         if (isReplying) {
+            const newReply = {
+                id: Date.now().toString(),
+                userId: currentUser.id,
+                username: currentUser.display_name,
+                content: comment,
+                likeCount: 0,
+                likedBy: [],
+                profileImage: currentUser?.images[1].url,
+            };
+
+            setCommentsToDisplay((prevComments) =>
+                prevComments.map((commentItem) =>
+                    commentItem.id === replyToCommentId
+                        ? {
+                              ...commentItem,
+                              replies: [
+                                  ...(commentItem.replies || []),
+                                  newReply,
+                              ],
+                          }
+                        : commentItem
+                )
+            );
+
             addReply({
                 reply: comment,
                 songId: songId,
@@ -76,7 +101,6 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
                 currentUserId: currentUser.id,
                 name: currentUser.display_name,
                 imageLink: currentUser?.images[1].url,
-                setPostingReply: setPostingComment,
                 setReply: setComment,
                 setCommentsToDisplay: setCommentsToDisplay,
             });
@@ -88,7 +112,6 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
                 currentUserId: currentUser.id,
                 name: currentUser.display_name,
                 imageLink: currentUser?.images[1].url,
-                setPostingComment: setPostingComment,
                 setComment: setComment,
                 setCommentsToDisplay: setCommentsToDisplay,
             });
@@ -158,7 +181,7 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
                 ) : (
                     <FlatList
                         data={commentsToDisplay}
-                        keyExtractor={(item) => item.id}
+                        keyExtractor={keyExtractor}
                         renderItem={renderItem}
                         ItemSeparatorComponent={<View style={{ height: 20 }} />}
                         style={styles.listStyle}
