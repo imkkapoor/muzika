@@ -50,6 +50,9 @@ const setTokens = async (response) => {
     AsyncStorage.setItem("expirationDate", expirationDate.toString());
 };
 
+const setSelectedPlaylistId = async (selectedPlaylistId) => {
+    await AsyncStorage.setItem("selectedPlaylistId", selectedPlaylistId);
+};
 const logout = async () => {
     AsyncStorage.removeItem("accessToken");
     AsyncStorage.removeItem("refreshToken");
@@ -62,4 +65,5 @@ export {
     getRefreshToken,
     setTokens,
     logout,
+    setSelectedPlaylistId,
 };

@@ -18,7 +18,7 @@
     "@shopify/flash-list": "1.6.4",
     "add": "^2.0.6",
     "axios": "^1.7.2",
-    "expo": "^51.0.21",
+    "expo": "^51.0.22",
     "expo-auth-session": "~5.5.2",
     "expo-av": "~14.0.6",
     "expo-crypto": "~13.0.2",

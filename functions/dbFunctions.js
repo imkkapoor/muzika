@@ -17,6 +17,7 @@ import { db } from "../firebase";
 import * as Crypto from "expo-crypto";
 import * as Haptics from "expo-haptics";
 import { Keyboard } from "react-native";
+import { setSelectedPlaylistId } from "./localStorageFunctions";
 
 const getPlaylistId = async (userProfile) => {
     spotifyUserId = userProfile.id;
@@ -330,6 +331,66 @@ const toggleReplyLike = async ({ item, songId, commentId, currentUser }) => {
     }
 };
 
+const pushSelectedPlaylist = async ({
+    selectedPlaylistId,
+    playlistName,
+    setWaitingPlaylistAddition,
+    currentUser,
+}) => {
+    console.log(
+        selectedPlaylistId,
+        playlistName,
+        setWaitingPlaylistAddition,
+        currentUser
+    );
+    setWaitingPlaylistAddition(true);
+    try {
+        setSelectedPlaylistId(selectedPlaylistId);
+        console.log("Saved Playlist ID:", selectedPlaylistId);
+        if (currentUser) {
+            await storeUserDataInFirestore(
+                currentUser,
+                playlistName,
+                selectedPlaylistId
+            );
+        } else {
+            console.log("User profile is null");
+        }
+    } catch (err) {
+        console.log("Error in playlist selection:", err);
+        Alert.alert("Please try again!");
+    } finally {
+        setWaitingPlaylistAddition(false);
+    }
+};
+
+const storeUserDataInFirestore = async (
+    userProfile,
+    playlistName,
+    selectedPlaylistId
+) => {
+    try {
+        const userDocRef = doc(db, "users", userProfile.id);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+            await updateDoc(userDocRef, {
+                playlistId: selectedPlaylistId,
+                playlistName: playlistName,
+            });
+        } else {
+            await setDoc(userDocRef, {
+                email: userProfile.email,
+                name: userProfile.display_name,
+                playlistId: selectedPlaylistId,
+                playlistName: playlistName,
+            });
+        }
+    } catch (err) {
+        console.error("Error storing user data in Firestore:", err);
+    }
+};
+
 export {
     getPlaylistId,
     checkUserExists,
@@ -340,4 +401,5 @@ export {
     toggleCommentLike,
     addReply,
     toggleReplyLike,
+    pushSelectedPlaylist,
 };

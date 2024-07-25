@@ -19,6 +19,8 @@ import { useNavigation } from "@react-navigation/native";
 import LoadingFullScreen from "../components/LoadingFullScreen";
 import { getAccessToken } from "../functions/localStorageFunctions";
 import { User } from "../UserContext";
+import EachPlaylist from "../components/EachPlaylist";
+import { pushSelectedPlaylist } from "../functions/dbFunctions";
 
 const ChoosePlaylistScreen = () => {
     const navigation = useNavigation();
@@ -57,48 +59,14 @@ const ChoosePlaylistScreen = () => {
         }
     };
 
-    const storeUserDataInFirestore = async (
-        userProfile,
-        playlistName,
-        selectedPlaylistId
-    ) => {
-        try {
-            const userDocRef = doc(db, "users", userProfile.id);
-            await setDoc(userDocRef, {
-                email: userProfile.email,
-                name: userProfile.display_name,
-                playlistId: selectedPlaylistId,
-                playlistName: playlistName,
-            });
-        } catch (err) {
-            console.error("Error storing user data in Firestore:", err);
-        }
-    };
-
-    const selectPlaylist = async (selectedPlaylistId, playlistName) => {
-        setWaitingPlaylistAddition(true);
-        try {
-            await AsyncStorage.setItem(
-                "selectedPlaylistId",
-                selectedPlaylistId
-            );
-            console.log("Saved Playlist ID:", selectedPlaylistId);
-            if (currentUser) {
-                await storeUserDataInFirestore(
-                    currentUser,
-                    playlistName,
-                    selectedPlaylistId
-                );
-            } else {
-                console.log("User profile is null");
-            }
-            navigation.replace("ChooseGenre");
-        } catch (err) {
-            console.log("Error in playlist selection:", err);
-            Alert.alert("Please try again!");
-        } finally {
-            setWaitingPlaylistAddition(false);
-        }
+    const selectPlaylist = async (item) => {
+        pushSelectedPlaylist({
+            selectedPlaylistId: item.id,
+            playlistName: item.name,
+            setWaitingPlaylistAddition: setWaitingPlaylistAddition,
+            currentUser: currentUser,
+        });
+        navigation.replace("ChooseGenre");
     };
 
     const handleCreateNewPlaylist = () => {
@@ -161,17 +129,13 @@ const ChoosePlaylistScreen = () => {
         ({ item }) => (
             <TouchableOpacity
                 activeOpacity={0.6}
-                onPress={() => selectPlaylist(item.id, item.name)}
+                onPress={() => selectPlaylist(item)}
             >
-                <View style={styles.eachPlaylistContainer}>
-                    {item.images && item.images.length > 0 && (
-                        <Image
-                            source={{ uri: item.images[0].url }}
-                            style={styles.playlistImage}
-                        />
-                    )}
-                    <Text style={styles.playlistName}>{item.name}</Text>
-                </View>
+                <EachPlaylist
+                    item={item}
+                    setWaitingPlaylistAddition={setWaitingPlaylistAddition}
+                    currentUser={currentUser}
+                />
             </TouchableOpacity>
         ),
         [playlists]
@@ -341,22 +305,7 @@ const styles = StyleSheet.create({
         marginTop: 15,
         alignSelf: "center",
     },
-    eachPlaylistContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        padding: 10,
-        backgroundColor: "#191414",
-        borderRadius: 10,
-        width: 345,
-        overflow: "hidden",
-    },
-    playlistImage: { width: 40, height: 40, marginRight: 10, borderRadius: 12 },
-    playlistName: {
-        color: "white",
-        fontFamily: "Inter-Medium",
-        fontSize: 15,
-        width: 262,
-    },
+
     modalBackground: {
         flex: 1,
         justifyContent: "center",
