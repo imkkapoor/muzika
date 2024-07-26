@@ -83,7 +83,7 @@ const ProfileScreen = () => {
                     <TouchableOpacity
                         activeOpacity={0.6}
                         onPress={() => {
-                            navigation.navigate("Main");
+                            navigation.goBack();
                         }}
                     >
                         <CaretLeft size={24} color="white" />
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
         marginLeft: 23,
     },
     recentlyAddedBox: {
-        marginTop: 50,
+        marginTop: 42,
     },
     recentlyAddedContainer: {
         display: "flex",
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
         marginTop: 5,
     },
     recentAddText: {
-        marginLeft: 30,
+        marginLeft: 40,
         color: "white",
         fontSize: 16,
         fontFamily: "Inter-SemiBold",
@@ -300,11 +300,11 @@ const styles = StyleSheet.create({
         marginLeft: 23,
         display: "flex",
         alignItems: "flex-start",
-        marginTop: 43,
+        marginTop: 42,
     },
     preferencesButton: {
         padding: 12,
-        backgroundColor: "#191414",
+        backgroundColor: "#0c0c0c",
         borderRadius: 10,
         display: "flex",
         justifyContent: "center",
