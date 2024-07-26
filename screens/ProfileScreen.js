@@ -10,13 +10,14 @@ import {
     Modal,
 } from "react-native";
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { CaretLeft, CaretRight } from "phosphor-react-native";
+import { CaretRight } from "phosphor-react-native";
 import { useNavigation } from "@react-navigation/native";
 import { db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { getTracks } from "../functions/spotify";
 import RecentlyAddedCard from "../components/RecentlyAddedCard";
 import { User } from "../UserContext";
+import NavigationBar from "../components/NavigationBar";
 import { logout } from "../functions/localStorageFunctions";
 
 const ProfileScreen = () => {
@@ -79,17 +80,7 @@ const ProfileScreen = () => {
             }}
         >
             <SafeAreaView>
-                <View style={styles.titleBar}>
-                    <TouchableOpacity
-                        activeOpacity={0.6}
-                        onPress={() => {
-                            navigation.goBack();
-                        }}
-                    >
-                        <CaretLeft size={24} color="white" />
-                    </TouchableOpacity>
-                    <Text style={styles.title}>/múzika/profile</Text>
-                </View>
+                <NavigationBar title={"/múzika/profile"} />
                 <View style={styles.personalInfoContainer}>
                     <Image
                         source={{ uri: currentUser?.images[1].url }}
