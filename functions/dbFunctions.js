@@ -20,9 +20,12 @@ import { Keyboard } from "react-native";
 import { setSelectedPlaylistId } from "./localStorageFunctions";
 
 const getPlaylistId = async (userProfile) => {
-    spotifyUserId = userProfile.id;
-    const userDocRef = doc(db, "users", spotifyUserId);
     try {
+        if (!userProfile) {
+            throw new Error("userProfile is null");
+        }
+        spotifyUserId = userProfile.id;
+        const userDocRef = doc(db, "users", spotifyUserId);
         const userDoc = await getDoc(userDocRef);
         if (userDoc.exists()) {
             const playlistId = userDoc.data().playlistId;

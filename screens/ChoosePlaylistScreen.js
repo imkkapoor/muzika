@@ -141,8 +141,6 @@ const ChoosePlaylistScreen = () => {
                 ) : (
                     <PLaylistsList
                         playlists={playlists}
-                        currentUser={currentUser}
-                        setWaitingPlaylistAddition={setWaitingPlaylistAddition}
                         selectPlaylist={selectPlaylist}
                     />
                 )}
