@@ -12,7 +12,6 @@ const discovery = {
     tokenEndpoint: "https://accounts.spotify.com/api/token",
 };
 
-
 const getTracks = async (tracks) => {
     const accessToken = await getAccessToken();
     if (!accessToken) {
@@ -104,7 +103,6 @@ const exchangeRefreshTokenForAccessToken = async (token) => {
             refreshToken: token,
             clientId: CLIENT_ID,
             clientSecret: CLIENT_SECRET,
-            
         },
         discovery
     );
@@ -132,10 +130,34 @@ const exchangeCodeForToken = async (code) => {
     }
 };
 
+const getPlaylists = async ({ currentUser, setPlaylists, setIsLoading }) => {
+    const accessToken = await getAccessToken();
+
+    try {
+        const response = await fetch(
+            "https://api.spotify.com/v1/me/playlists",
+            {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            }
+        );
+        const data = await response.json();
+        const ownedPlaylists = data.items.filter(
+            (playlist) => playlist.owner.id === currentUser.id
+        );
+        setPlaylists(ownedPlaylists);
+        setIsLoading(false);
+    } catch (error) {
+        console.error(error);
+    }
+};
+
 export {
     getTracks,
     getPLaylistSpecificTracks,
     getProfile,
     exchangeCodeForToken,
     exchangeRefreshTokenForAccessToken,
+    getPlaylists,
 };

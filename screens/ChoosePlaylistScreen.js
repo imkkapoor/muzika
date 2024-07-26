@@ -12,15 +12,15 @@ import {
     TextInput,
     Alert,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { doc, setDoc } from "firebase/firestore";
-import { db } from "../firebase";
+
 import { useNavigation } from "@react-navigation/native";
 import LoadingFullScreen from "../components/LoadingFullScreen";
 import { getAccessToken } from "../functions/localStorageFunctions";
 import { User } from "../UserContext";
 import EachPlaylist from "../components/EachPlaylist";
 import { pushSelectedPlaylist } from "../functions/dbFunctions";
+import PLaylistsList from "../components/PLaylistsList";
+import { getPlaylists } from "../functions/spotify";
 
 const ChoosePlaylistScreen = () => {
     const navigation = useNavigation();
@@ -33,31 +33,8 @@ const ChoosePlaylistScreen = () => {
     const [newPlaylistName, setNewPlaylistName] = useState("");
 
     useEffect(() => {
-        fetchPlaylists();
+        getPlaylists({ currentUser, setPlaylists, setIsLoading });
     }, []);
-
-    const fetchPlaylists = async () => {
-        const accessToken = await getAccessToken();
-
-        try {
-            const response = await fetch(
-                "https://api.spotify.com/v1/me/playlists",
-                {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`,
-                    },
-                }
-            );
-            const data = await response.json();
-            const ownedPlaylists = data.items.filter(
-                (playlist) => playlist.owner.id === currentUser.id
-            );
-            setPlaylists(ownedPlaylists);
-            setIsLoading(false);
-        } catch (error) {
-            console.error(error);
-        }
-    };
 
     const selectPlaylist = async (item) => {
         pushSelectedPlaylist({
@@ -125,28 +102,6 @@ const ChoosePlaylistScreen = () => {
         }
     };
 
-    const renderItem = useCallback(
-        ({ item }) => (
-            <TouchableOpacity
-                activeOpacity={0.6}
-                onPress={() => selectPlaylist(item)}
-            >
-                <EachPlaylist
-                    item={item}
-                    setWaitingPlaylistAddition={setWaitingPlaylistAddition}
-                    currentUser={currentUser}
-                />
-            </TouchableOpacity>
-        ),
-        [playlists]
-    );
-
-    const keyExtractor = useCallback((item) => item.id, []);
-
-    const itemSeparatorComponent = useCallback(() => {
-        return <View style={{ height: 12 }}></View>;
-    });
-
     return (
         <View style={{ backgroundColor: "black", height: "100%" }}>
             <SafeAreaView style={styles.container}>
@@ -184,16 +139,11 @@ const ChoosePlaylistScreen = () => {
                         <ActivityIndicator size="small" color="white" />
                     </View>
                 ) : (
-                    <FlatList
-                        data={playlists}
-                        keyExtractor={keyExtractor}
-                        renderItem={renderItem}
-                        contentContainerStyle={{
-                            display: "flex",
-                            alignContent: "center",
-                            justifyContent: "center",
-                        }}
-                        ItemSeparatorComponent={itemSeparatorComponent}
+                    <PLaylistsList
+                        playlists={playlists}
+                        currentUser={currentUser}
+                        setWaitingPlaylistAddition={setWaitingPlaylistAddition}
+                        selectPlaylist={selectPlaylist}
                     />
                 )}
 

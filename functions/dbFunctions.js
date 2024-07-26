@@ -354,11 +354,13 @@ const pushSelectedPlaylist = async ({
                 selectedPlaylistId
             );
         } else {
-            console.log("User profile is null");
+            throw new Error("User doesn't exists");
         }
+        return true;
     } catch (err) {
         console.log("Error in playlist selection:", err);
         Alert.alert("Please try again!");
+        return false;
     } finally {
         setWaitingPlaylistAddition(false);
     }

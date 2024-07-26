@@ -253,6 +253,14 @@ const HomeScreen = () => {
                         <TouchableOpacity
                             activeOpacity={0.6}
                             onPress={() => {
+                                navigation.navigate("ChoosePlaylist");
+                            }}
+                        >
+                            <Text style={{ color: "white" }}>Playlist</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            activeOpacity={0.6}
+                            onPress={() => {
                                 navigation.navigate("Profile");
                             }}
                         >

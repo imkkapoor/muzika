@@ -10,7 +10,7 @@ import {
     Modal,
 } from "react-native";
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { CaretLeft } from "phosphor-react-native";
+import { CaretLeft, CaretRight } from "phosphor-react-native";
 import { useNavigation } from "@react-navigation/native";
 import { db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -102,6 +102,24 @@ const ProfileScreen = () => {
                         <Text style={styles.email}>{currentUser?.email}</Text>
                     </View>
                 </View>
+                <View style={styles.preferencesButtonContainer}>
+                    <TouchableOpacity
+                        activeOpacity={0.6}
+                        style={styles.preferencesButton}
+                        onPress={() => {
+                            navigation.navigate("ChangePreferences");
+                        }}
+                    >
+                        <Text style={styles.preferencesButtonText}>
+                            Change Preferences
+                        </Text>
+                        <CaretRight
+                            size={19}
+                            color="white"
+                            style={{ marginLeft: 3 }}
+                        />
+                    </TouchableOpacity>
+                </View>
                 <View style={styles.recentlyAddedBox}>
                     <Text style={styles.recentAddText}>Your recent adds</Text>
                     <View style={styles.recentlyAddedContainer}>
@@ -119,23 +137,12 @@ const ProfileScreen = () => {
                         )}
                     </View>
                 </View>
-                <View
-                    style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        margin: 20,
-                    }}
-                >
+                <View style={styles.logoutButtonContainer}>
                     <TouchableOpacity
                         onPress={() => {
                             setIsModalVisible(true);
                         }}
-                        style={{
-                            backgroundColor: "#0c0c0c",
-                            padding: 10,
-                            borderRadius: 10,
-                        }}
+                        style={styles.logoutButton}
                     >
                         <Text style={{ color: "white" }}>Logout</Text>
                     </TouchableOpacity>
@@ -288,5 +295,36 @@ const styles = StyleSheet.create({
     },
     firstButtonBox: {
         borderRightWidth: 1,
+    },
+    preferencesButtonContainer: {
+        marginLeft: 23,
+        display: "flex",
+        alignItems: "flex-start",
+        marginTop: 43,
+    },
+    preferencesButton: {
+        padding: 12,
+        backgroundColor: "#191414",
+        borderRadius: 10,
+        display: "flex",
+        justifyContent: "center",
+        flexDirection: "row",
+    },
+    preferencesButtonText: {
+        color: "white",
+        fontSize: 16,
+        fontFamily: "Inter-SemiBold",
+    },
+
+    logoutButtonContainer: {
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        margin: 20,
+    },
+    logoutButton: {
+        backgroundColor: "#0c0c0c",
+        padding: 10,
+        borderRadius: 10,
     },
 });
