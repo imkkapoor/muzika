@@ -20,6 +20,7 @@ import {
     DotsThree,
     PlusCircle,
     CheckCircle,
+    Plus,
 } from "phosphor-react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
@@ -276,7 +277,32 @@ const MusicCard = ({
                     style={styles.commentPreview}
                     onPress={handleCommmentsVisibility}
                 >
-                    <Text style={styles.comment}>Comments</Text>
+                    <Image
+                        source={{
+                            uri: "https://drive.google.com/thumbnail?id=1BgwTgy59jH0efCCy4G3onPHK3gY8w_8l",
+                        }}
+                        style={[styles.profilesThatCommented, { left: 7 }]}
+                    />
+                    <Image
+                        source={{
+                            uri: "https://drive.google.com/thumbnail?id=1T2fZqC2J1OUo2rZILWRhIzFKBMbNmyFH",
+                        }}
+                        style={[styles.profilesThatCommented, { left: 22 }]}
+                    />
+                    <Image
+                        source={{
+                            uri: "https://drive.google.com/thumbnail?id=1UClYEhUZ6TpTn_hLnOoDeituGnS53x-D",
+                        }}
+                        style={[styles.profilesThatCommented, { left: 37 }]}
+                    />
+                    <Image
+                        source={{
+                            uri: "https://drive.google.com/thumbnail?id=1qJL2I90dwOab1i9UREBV-GodTKTx8rPd",
+                        }}
+                        style={[styles.profilesThatCommented, { left: 52 }]}
+                    />
+
+                    <Plus size={19} color="white" style={styles.plus} />
                 </TouchableOpacity>
                 {isAdded ? (
                     <CheckCircle color="#1ED760" size={37} weight="fill" />
@@ -354,9 +380,17 @@ const styles = StyleSheet.create({
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        flexDirection: "row",
     },
-    comment: {
-        color: "white",
+    profilesThatCommented: {
+        height: 25,
+        width: 25,
+        borderRadius: 100,
+        position: "absolute",
+    },
+    plus: {
+        position: "absolute",
+        right: 8,
     },
     artworkContainer: {
         position: "relative",

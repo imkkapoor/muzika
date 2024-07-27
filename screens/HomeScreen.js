@@ -300,8 +300,9 @@ const HomeScreen = () => {
                     )}
                 </SafeAreaView>
                 <ShareBottomSheet
-                    isVisible={isBottomSheetVisible}
+                    isBottomSheetVisible={isBottomSheetVisible}
                     onClose={() => setIsBottomSheetVisible(false)}
+                    setIsBottomSheetVisible = {setIsBottomSheetVisible}
                     url={activeSongShareUrl}
                     name={activeSongName}
                     itemId={activeSongId}

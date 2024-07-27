@@ -50,7 +50,14 @@ const checkUserExists = async (spotifyUserId) => {
     }
 };
 
-const addSongIdToNotInterested = async ({ itemId, currentUser }) => {
+const addSongIdToNotInterested = async ({
+    itemId,
+    currentUser,
+    setIsBottomSheetVisible,
+    setIsModalVisible,
+}) => {
+    setIsBottomSheetVisible(false);
+    setIsModalVisible(true);
     try {
         const userDocRef = doc(db, "users", currentUser.id);
         const userDoc = await getDoc(userDocRef);
@@ -74,6 +81,7 @@ const addSongIdToNotInterested = async ({ itemId, currentUser }) => {
             "Error storing the song to notInterested in Firestoree:",
             err
         );
+        setIsBottomSheetVisible(true);
     }
 };
 
@@ -340,16 +348,9 @@ const pushSelectedPlaylist = async ({
     setWaitingPlaylistAddition,
     currentUser,
 }) => {
-    console.log(
-        selectedPlaylistId,
-        playlistName,
-        setWaitingPlaylistAddition,
-        currentUser
-    );
     setWaitingPlaylistAddition(true);
     try {
         setSelectedPlaylistId(selectedPlaylistId);
-        console.log("Saved Playlist ID:", selectedPlaylistId);
         if (currentUser) {
             await storeUserDataInFirestore(
                 currentUser,

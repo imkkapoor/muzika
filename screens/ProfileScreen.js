@@ -135,7 +135,7 @@ const ProfileScreen = () => {
                         }}
                         style={styles.logoutButton}
                     >
-                        <Text style={{ color: "white" }}>Logout</Text>
+                        <Text style={styles.logoutButtonText}>Logout</Text>
                     </TouchableOpacity>
                 </View>
                 <Modal
@@ -312,10 +312,17 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         margin: 20,
+        marginTop: 42,
     },
     logoutButton: {
         backgroundColor: "#0c0c0c",
+        backgroundColor: "#bf2a2a",
         padding: 10,
         borderRadius: 10,
+    },
+    logoutButtonText: {
+        color: "white",
+        fontSize: 15,
+        fontFamily: "Inter-SemiBold",
     },
 });
