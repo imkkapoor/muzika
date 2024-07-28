@@ -13,6 +13,8 @@ import genres from "../static/data";
 import { ArrowCircleRight, Plus, X } from "phosphor-react-native";
 import { db } from "../firebase";
 import { User } from "../UserContext";
+import { setSelectedGenreList } from "../functions/localStorageFunctions";
+import { storeGenreInFirestore } from "../functions/dbFunctions";
 
 const ChooseGenresScreen = () => {
     const [selectedGenres, setSelectedGenres] = useState([]);
@@ -33,10 +35,7 @@ const ChooseGenresScreen = () => {
 
     const handleGenreStorage = async () => {
         try {
-            await AsyncStorage.setItem(
-                "selectedGenreList",
-                JSON.stringify(selectedGenres)
-            );
+            setSelectedGenreList(selectedGenres);
             console.log("selectedGenre:", selectedGenres);
 
             if (currentUser) {
@@ -47,17 +46,6 @@ const ChooseGenresScreen = () => {
             navigation.replace("Main");
         } catch (err) {
             console.log("Error in playlist selection:", err);
-        }
-    };
-
-    const storeGenreInFirestore = async (userProfile, selectedGenres) => {
-        try {
-            const userDocRef = doc(db, "users", userProfile.id);
-            await updateDoc(userDocRef, {
-                "preferences.genre": selectedGenres,
-            });
-        } catch (err) {
-            console.error("Error storing user data in Firestore:", err);
         }
     };
 

@@ -253,14 +253,6 @@ const HomeScreen = () => {
                         <TouchableOpacity
                             activeOpacity={0.6}
                             onPress={() => {
-                                navigation.navigate("ChoosePlaylist");
-                            }}
-                        >
-                            <Text style={{ color: "white" }}>Playlist</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            activeOpacity={0.6}
-                            onPress={() => {
                                 navigation.navigate("Profile");
                             }}
                         >
@@ -302,7 +294,7 @@ const HomeScreen = () => {
                 <ShareBottomSheet
                     isBottomSheetVisible={isBottomSheetVisible}
                     onClose={() => setIsBottomSheetVisible(false)}
-                    setIsBottomSheetVisible = {setIsBottomSheetVisible}
+                    setIsBottomSheetVisible={setIsBottomSheetVisible}
                     url={activeSongShareUrl}
                     name={activeSongName}
                     itemId={activeSongId}

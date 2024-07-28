@@ -397,6 +397,17 @@ const storeUserDataInFirestore = async (
     }
 };
 
+const storeGenreInFirestore = async (userProfile, selectedGenres) => {
+    try {
+        const userDocRef = doc(db, "users", userProfile.id);
+        await updateDoc(userDocRef, {
+            "preferences.genre": selectedGenres,
+        });
+    } catch (err) {
+        console.error("Error storing user data in Firestore:", err);
+    }
+};
+
 export {
     getPlaylistId,
     checkUserExists,
@@ -408,4 +419,5 @@ export {
     addReply,
     toggleReplyLike,
     pushSelectedPlaylist,
+    storeGenreInFirestore,
 };

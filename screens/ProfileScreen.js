@@ -19,6 +19,8 @@ import RecentlyAddedCard from "../components/RecentlyAddedCard";
 import { User } from "../UserContext";
 import NavigationBar from "../components/NavigationBar";
 import { logout } from "../functions/localStorageFunctions";
+import ChangePreferencesBottomSheet from "../components/ChangePreferencesBottomSheet";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const ProfileScreen = () => {
     const maxNameLength = 10;
@@ -27,6 +29,10 @@ const ProfileScreen = () => {
     const [recentlyAddedTracks, setRecentlyAddedTracks] = useState([]);
     const [loading, setLoading] = useState(true);
     const { currentUser } = useContext(User);
+    const [
+        isChangePreferencesBottomSheetVisible,
+        setIsChangePreferencesBottomSheetVisible,
+    ] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
 
     useEffect(() => {
@@ -73,111 +79,126 @@ const ProfileScreen = () => {
     );
 
     return (
-        <View
-            style={{
-                backgroundColor: "black",
-                height: "100%",
-            }}
-        >
-            <SafeAreaView>
-                <NavigationBar title={"/múzika/profile"} />
-                <View style={styles.personalInfoContainer}>
-                    <Image
-                        source={{ uri: currentUser?.images[1].url }}
-                        style={styles.profilePicture}
-                    />
-                    <View style={styles.nameAndEmailContainer}>
-                        <Text style={styles.name}>
-                            {currentUser?.display_name}
-                        </Text>
-                        <Text style={styles.email}>{currentUser?.email}</Text>
-                    </View>
-                </View>
-                <View style={styles.preferencesButtonContainer}>
-                    <TouchableOpacity
-                        activeOpacity={0.6}
-                        style={styles.preferencesButton}
-                        onPress={() => {
-                            navigation.navigate("ChangePreferences");
-                        }}
-                    >
-                        <Text style={styles.preferencesButtonText}>
-                            Change Preferences
-                        </Text>
-                        <CaretRight
-                            size={19}
-                            color="white"
-                            style={{ marginLeft: 3 }}
+        <GestureHandlerRootView>
+            <View
+                style={{
+                    backgroundColor: "black",
+                    height: "100%",
+                }}
+            >
+                <SafeAreaView>
+                    <NavigationBar title={"/múzika/profile"} />
+                    <View style={styles.personalInfoContainer}>
+                        <Image
+                            source={{ uri: currentUser?.images[1].url }}
+                            style={styles.profilePicture}
                         />
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.recentlyAddedBox}>
-                    <Text style={styles.recentAddText}>Your recent adds</Text>
-                    <View style={styles.recentlyAddedContainer}>
-                        {loading ? (
-                            <ActivityIndicator size="small" color="white" />
-                        ) : (
-                            <FlatList
-                                data={recentlyAddedTracks}
-                                renderItem={renderItem}
-                                horizontal={true}
-                                snapToInterval={149}
-                                snapToAlignment="start"
-                                decelerationRate="fast"
-                            />
-                        )}
-                    </View>
-                </View>
-                <View style={styles.logoutButtonContainer}>
-                    <TouchableOpacity
-                        onPress={() => {
-                            setIsModalVisible(true);
-                        }}
-                        style={styles.logoutButton}
-                    >
-                        <Text style={styles.logoutButtonText}>Logout</Text>
-                    </TouchableOpacity>
-                </View>
-                <Modal
-                    transparent={true}
-                    animationType="fade"
-                    visible={isModalVisible}
-                    onRequestClose={() => setIsModalVisible(false)}
-                >
-                    <View style={styles.modalBackground}>
-                        <View style={styles.modalContainer}>
-                            <Text style={styles.modalTitle}>
-                                Are you sure you want to logout?
+                        <View style={styles.nameAndEmailContainer}>
+                            <Text style={styles.name}>
+                                {currentUser?.display_name}
                             </Text>
-
-                            <View style={styles.buttonContainer}>
-                                <TouchableOpacity
-                                    activeOpacity={0.6}
-                                    onPress={() => setIsModalVisible(false)}
-                                    style={[
-                                        styles.buttonBox,
-                                        styles.firstButtonBox,
-                                    ]}
-                                >
-                                    <Text style={styles.buttonText}>
-                                        Cancel
-                                    </Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    activeOpacity={0.6}
-                                    onPress={handleLogout}
-                                    style={styles.buttonBox}
-                                >
-                                    <Text style={styles.buttonText}>
-                                        Submit
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
+                            <Text style={styles.email}>
+                                {currentUser?.email}
+                            </Text>
                         </View>
                     </View>
-                </Modal>
-            </SafeAreaView>
-        </View>
+                    <View style={styles.preferencesButtonContainer}>
+                        <TouchableOpacity
+                            activeOpacity={0.6}
+                            style={styles.preferencesButton}
+                            onPress={() => {
+                                // navigation.navigate("ChangePreferences");
+                                setIsChangePreferencesBottomSheetVisible(true);
+                            }}
+                        >
+                            <Text style={styles.preferencesButtonText}>
+                                Change Preferences
+                            </Text>
+                            <CaretRight
+                                size={19}
+                                color="white"
+                                style={{ marginLeft: 3 }}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.recentlyAddedBox}>
+                        <Text style={styles.recentAddText}>
+                            Your recent adds
+                        </Text>
+                        <View style={styles.recentlyAddedContainer}>
+                            {loading ? (
+                                <ActivityIndicator size="small" color="white" />
+                            ) : (
+                                <FlatList
+                                    data={recentlyAddedTracks}
+                                    renderItem={renderItem}
+                                    horizontal={true}
+                                    snapToInterval={149}
+                                    snapToAlignment="start"
+                                    decelerationRate="fast"
+                                />
+                            )}
+                        </View>
+                    </View>
+                    <View style={styles.logoutButtonContainer}>
+                        <TouchableOpacity
+                            onPress={() => {
+                                setIsModalVisible(true);
+                            }}
+                            style={styles.logoutButton}
+                        >
+                            <Text style={styles.logoutButtonText}>Logout</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <Modal
+                        transparent={true}
+                        animationType="fade"
+                        visible={isModalVisible}
+                        onRequestClose={() => setIsModalVisible(false)}
+                    >
+                        <View style={styles.modalBackground}>
+                            <View style={styles.modalContainer}>
+                                <Text style={styles.modalTitle}>
+                                    Are you sure you want to logout?
+                                </Text>
+
+                                <View style={styles.buttonContainer}>
+                                    <TouchableOpacity
+                                        activeOpacity={0.6}
+                                        onPress={() => setIsModalVisible(false)}
+                                        style={[
+                                            styles.buttonBox,
+                                            styles.firstButtonBox,
+                                        ]}
+                                    >
+                                        <Text style={styles.buttonText}>
+                                            Cancel
+                                        </Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        activeOpacity={0.6}
+                                        onPress={handleLogout}
+                                        style={styles.buttonBox}
+                                    >
+                                        <Text style={styles.buttonText}>
+                                            Submit
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </View>
+                    </Modal>
+                </SafeAreaView>
+                <ChangePreferencesBottomSheet
+                    isChangePreferencesBottomSheetVisible={
+                        isChangePreferencesBottomSheetVisible
+                    }
+                    onClose={() =>
+                        setIsChangePreferencesBottomSheetVisible(false)
+                    }
+                />
+            </View>
+        </GestureHandlerRootView>
     );
 };
 

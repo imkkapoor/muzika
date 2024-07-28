@@ -40,6 +40,18 @@ const getRefreshToken = async () => {
     }
 };
 
+const getSelectedGenreList = async () => {
+    try {
+        const list = await AsyncStorage.getItem("selectedGenreList");
+        if (list) {
+            const selectedGenreList = JSON.parse(list);
+            return selectedGenreList;
+        }
+    } catch (error) {
+        return null;
+    }
+};
+
 const setTokens = async (response) => {
     const currentTime = new Date();
     const expirationDate = currentTime.getTime() + 3600 * 1000;
@@ -58,6 +70,14 @@ const logout = async () => {
     AsyncStorage.removeItem("refreshToken");
     AsyncStorage.removeItem("expirationDate");
 };
+
+const setSelectedGenreList = async (selectedGenres) => {
+    await AsyncStorage.setItem(
+        "selectedGenreList",
+        JSON.stringify(selectedGenres)
+    );
+};
+
 export {
     getUserProfile,
     getAccessToken,
@@ -66,4 +86,6 @@ export {
     setTokens,
     logout,
     setSelectedPlaylistId,
+    setSelectedGenreList,
+    getSelectedGenreList,
 };
