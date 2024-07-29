@@ -6,12 +6,19 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, {
+    useCallback,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 import BottomSheet, { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { PaperPlaneRight } from "phosphor-react-native";
 import { User } from "../UserContext";
 import { addComment, addReply, getComments } from "../functions/dbFunctions";
 import EachComment from "./EachComment";
+import { CommentsSkeleton } from "./SkeletonLoaders";
 
 const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
     const sheetRef = useRef(null);
@@ -137,17 +144,7 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
                 <Text style={styles.commentTitle}>Comments</Text>
                 <View style={styles.lineSeprator} />
                 {loadingComments ? (
-                    <ActivityIndicator
-                        size="small"
-                        color="white"
-                        style={{
-                            display: "flex",
-                            alignItems: "center",
-                            alignContent: "center",
-                            justifyContent: "center",
-                            flex: 1,
-                        }}
-                    />
+                    <CommentsSkeleton />
                 ) : commentsToDisplay.length == 0 ? (
                     <View
                         style={{

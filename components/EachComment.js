@@ -11,6 +11,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Heart } from "phosphor-react-native";
 import { getReplies, toggleCommentLike } from "../functions/dbFunctions";
 import EachReply from "./EachReply";
+import SkeletonLoader, { RepliesSkeleton } from "./SkeletonLoaders";
 
 const ReplyState = {
     HIDDEN: "hidden",
@@ -126,7 +127,12 @@ const EachComment = ({
         );
     };
 
-    const keyExtractor = useCallback((item) => {item.id}, []);
+    const keyExtractor = useCallback(
+        (item) => {
+            item.id;
+        },
+        [replies]
+    );
     return (
         <View style={styles.eachCommentContainer}>
             <Image
@@ -151,21 +157,8 @@ const EachComment = ({
                             ItemSeparatorComponent={
                                 <View style={{ height: 20 }} />
                             }
-                            
                             ListFooterComponent={
-                                repliesAreLoading && (
-                                    <ActivityIndicator
-                                        size="small"
-                                        color="white"
-                                        style={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            alignContent: "center",
-                                            justifyContent: "center",
-                                            height: 60,
-                                        }}
-                                    />
-                                )
+                                repliesAreLoading && <RepliesSkeleton />
                             }
                         />
                     </View>

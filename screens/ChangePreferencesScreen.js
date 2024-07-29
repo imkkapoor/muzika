@@ -54,7 +54,7 @@ const ChangeSelectedPlaylist = () => {
             <SafeAreaView style={{ backgroundColor: "black", height: "100%" }}>
                 <NavigationBar title={"/múzika/playlistSelection"} />
                 <View style={styles.container}>
-                    <Text style={styles.changeSelectedPlaylistText}>
+                    <Text style={styles.changeSelectedText}>
                         Change Selected Playlist
                     </Text>
 
@@ -120,7 +120,9 @@ const ChangeSelectedGenre = () => {
         <View style={{ backgroundColor: "black", height: "100%" }}>
             <SafeAreaView style={styles.container}>
                 <NavigationBar title={"/múzika/genreSelection"} />
-
+                <Text style={styles.changeSelectedText}>
+                        Change Selected Genres
+                    </Text>
                 <View style={styles.genreGrid}>
                     {genres.map((genre) => (
                         <TouchableOpacity
@@ -174,7 +176,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
-    changeSelectedPlaylistText: {
+    changeSelectedText: {
         color: "white",
         fontSize: 16,
         fontFamily: "Inter-SemiBold",
@@ -212,7 +214,7 @@ const styles = StyleSheet.create({
         flexWrap: "wrap",
         justifyContent: "center",
         alignItems: "center",
-        marginTop: 40,
+        marginTop: 0,
     },
     genreItem: {
         display: "flex",
