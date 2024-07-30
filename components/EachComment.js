@@ -11,7 +11,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Heart } from "phosphor-react-native";
 import { getReplies, toggleCommentLike } from "../functions/dbFunctions";
 import EachReply from "./EachReply";
-import SkeletonLoader, { RepliesSkeleton } from "./SkeletonLoaders";
+import SkeletonLoader from "./SkeletonLoader";
 
 const ReplyState = {
     HIDDEN: "hidden",
@@ -158,7 +158,11 @@ const EachComment = ({
                                 <View style={{ height: 20 }} />
                             }
                             ListFooterComponent={
-                                repliesAreLoading && <RepliesSkeleton />
+                                repliesAreLoading && (
+                                    <SkeletonLoader
+                                        styleSheetRef={repliesSkeleton}
+                                    />
+                                )
                             }
                         />
                     </View>
@@ -264,5 +268,43 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: "white",
         marginTop: 2,
+    },
+});
+
+const repliesSkeleton = StyleSheet.create({
+    skeletonParent: {
+        display: "flex",
+        alignItems: "center",
+        alignContent: "center",
+        justifyContent: "center",
+        height: 60,
+    },
+    skeletonContainer: {
+        flexDirection: "row",
+        alignItems: "flex-start",
+        marginVertical: 10,
+        width: 277,
+        marginLeft: 40,
+    },
+
+    skeletonProfilePicture: {
+        width: 30,
+        height: 30,
+        borderRadius: 22.5,
+        backgroundColor: "#979797",
+        marginRight: 10,
+    },
+
+    skeletonTextContainer: {
+        width: 195,
+        display: "flex",
+        justifyContent: "center",
+        height: 35,
+    },
+    skeletonText: {
+        height: 6,
+        backgroundColor: "#979797",
+        marginBottom: 6,
+        borderRadius: 4,
     },
 });

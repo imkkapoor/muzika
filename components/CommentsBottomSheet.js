@@ -18,7 +18,7 @@ import { PaperPlaneRight } from "phosphor-react-native";
 import { User } from "../UserContext";
 import { addComment, addReply, getComments } from "../functions/dbFunctions";
 import EachComment from "./EachComment";
-import { CommentsSkeleton } from "./SkeletonLoaders";
+import SkeletonLoader from "./SkeletonLoader";
 
 const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
     const sheetRef = useRef(null);
@@ -144,7 +144,7 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
                 <Text style={styles.commentTitle}>Comments</Text>
                 <View style={styles.lineSeprator} />
                 {loadingComments ? (
-                    <CommentsSkeleton />
+                    <SkeletonLoader styleSheetRef={commentsSkeleton} />
                 ) : commentsToDisplay.length == 0 ? (
                     <View
                         style={{
@@ -304,3 +304,45 @@ const styles = StyleSheet.create({
         height: "95%",
     },
 });
+
+const commentsSkeleton = StyleSheet.create({
+    skeletonParent:{
+        display: "flex",
+        alignItems: "center",
+        alignContent: "center",
+        justifyContent: "center",
+        marginTop: 26,
+        paddingBottom: 35,
+        flex: 1,
+    },
+    skeletonContainer: {
+        flexDirection: "row",
+        alignItems: "flex-start",
+        marginVertical: 10,
+        width: 336,
+        flex: 1,
+    },
+
+    skeletonProfilePicture: {
+        width: 45,
+        height: 45,
+        borderRadius: 22.5,
+        backgroundColor: "#979797",
+        marginRight: 10,
+    },
+
+    skeletonTextContainer: {
+        width: 240,
+        display: "flex",
+        justifyContent: "center",
+        height: 40,
+    },
+
+    skeletonText: {
+        height: 8,
+        backgroundColor: "#979797",
+        marginBottom: 6,
+        borderRadius: 4,
+    },
+});
+
