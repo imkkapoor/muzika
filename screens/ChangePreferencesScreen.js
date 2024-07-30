@@ -52,10 +52,15 @@ const ChangeSelectedPlaylist = () => {
     return (
         <View style={{ backgroundColor: "black" }}>
             <SafeAreaView style={{ backgroundColor: "black", height: "100%" }}>
-                <NavigationBar title={"/múzika/playlistSelection"} />
+                <NavigationBar title={"/múzika/playlists"} />
                 <View style={styles.container}>
-                    <Text style={styles.changeSelectedText}>
-                        Change Selected Playlist
+                    <Text
+                        style={[
+                            styles.changeSelectedText,
+                            { marginBottom: 30 },
+                        ]}
+                    >
+                        Just tap on the playlist you want to switch to!
                     </Text>
 
                     <PLaylistsList
@@ -74,7 +79,6 @@ const ChangeSelectedPlaylist = () => {
 const ChangeSelectedGenre = () => {
     const [selectedGenres, setSelectedGenres] = useState([]);
     const [waitingGenreAddition, setWaitingGenreAddition] = useState(false);
-    const navigation = useNavigation();
     const { currentUser } = useContext(User);
 
     useEffect(() => {
@@ -119,10 +123,21 @@ const ChangeSelectedGenre = () => {
     return (
         <View style={{ backgroundColor: "black", height: "100%" }}>
             <SafeAreaView style={styles.container}>
-                <NavigationBar title={"/múzika/genreSelection"} />
+                <NavigationBar title={"/múzika/genres"} />
                 <Text style={styles.changeSelectedText}>
-                        Change Selected Genres
-                    </Text>
+                    Choose your favourite genres by tapping on them!
+                </Text>
+                <Text
+                    style={{
+                        color: "white",
+                        marginBottom: 30,
+                        fontFamily: "Inter-Medium",
+                        fontSize: 14,
+                        marginTop: 10,
+                    }}
+                >
+                    Maximum five options are allowed
+                </Text>
                 <View style={styles.genreGrid}>
                     {genres.map((genre) => (
                         <TouchableOpacity
@@ -177,10 +192,12 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     changeSelectedText: {
+        textAlign: "center",
         color: "white",
-        fontSize: 16,
+        fontSize: 18,
         fontFamily: "Inter-SemiBold",
         margin: 12,
+        width: 300,
     },
     container: {
         display: "flex",
@@ -214,7 +231,7 @@ const styles = StyleSheet.create({
         flexWrap: "wrap",
         justifyContent: "center",
         alignItems: "center",
-        marginTop: 0,
+        marginTop: -10,
     },
     genreItem: {
         display: "flex",
