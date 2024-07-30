@@ -127,12 +127,7 @@ const EachComment = ({
         );
     };
 
-    const keyExtractor = useCallback(
-        (item) => {
-            item.id;
-        },
-        [replies]
-    );
+    const keyExtractor = useCallback((item) => item.id, [replies]);
     return (
         <View style={styles.eachCommentContainer}>
             <Image
