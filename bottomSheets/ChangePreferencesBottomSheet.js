@@ -1,6 +1,6 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
-import React, { useRef } from "react";
+import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
+import React, { useCallback, useRef } from "react";
 import { MaskHappy, Playlist } from "phosphor-react-native";
 import { useNavigation } from "@react-navigation/native";
 
@@ -10,7 +10,19 @@ const ChangePreferencesBottomSheet = ({
 }) => {
     const sheetRef = useRef(null);
     const snapPoints = ["27%"];
-    const navigation = useNavigation()
+    const navigation = useNavigation();
+
+    const renderBackdrop = useCallback(
+        (props) => (
+            <BottomSheetBackdrop
+                {...props}
+                disappearsOnIndex={-1}
+                appearsOnIndex={0}
+            />
+        ),
+        []
+    );
+
     return (
         <BottomSheet
             ref={sheetRef}
@@ -24,6 +36,7 @@ const ChangePreferencesBottomSheet = ({
                 height: 5,
                 width: 55,
             }}
+            backdropComponent={renderBackdrop}
         >
             <View style={styles.contentContainer}>
                 <TouchableOpacity
@@ -33,7 +46,9 @@ const ChangePreferencesBottomSheet = ({
                         padding: 10,
                         width: "90%",
                     }}
-                    onPress={()=>{navigation.navigate("ChangeSelectedPlaylist")}}
+                    onPress={() => {
+                        navigation.navigate("ChangeSelectedPlaylist");
+                    }}
                 >
                     <View style={styles.optionContainer}>
                         <View style={styles.eachOption}>
@@ -52,8 +67,9 @@ const ChangePreferencesBottomSheet = ({
                         width: "90%",
                         marginTop: 0,
                     }}
-                    onPress={()=>{navigation.navigate("ChangeSelectedGenre")}}
-
+                    onPress={() => {
+                        navigation.navigate("ChangeSelectedGenre");
+                    }}
                 >
                     <View style={styles.optionContainer}>
                         <View style={styles.eachOption}>

@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        transform: [{ translateX: -18 }],
+        transform: [{ translateX: -18 }, { translateY: 18 }],
         height: 78,
         width: 78,
         backgroundColor: "rgba(0,0,0,0.5)",

@@ -19,7 +19,7 @@ import RecentlyAddedCard from "../components/RecentlyAddedCard";
 import { User } from "../UserContext";
 import NavigationBar from "../components/NavigationBar";
 import { logout } from "../functions/localStorageFunctions";
-import ChangePreferencesBottomSheet from "../components/ChangePreferencesBottomSheet";
+import ChangePreferencesBottomSheet from "../bottomSheets/ChangePreferencesBottomSheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const ProfileScreen = () => {

@@ -15,10 +15,9 @@ import {
     pushSelectedPlaylist,
     storeGenreInFirestore,
 } from "../functions/dbFunctions";
-import LoadingFullScreen from "../components/LoadingFullScreen";
+import LoadingFullScreen from "../loaders/LoadingFullScreen";
 import NavigationBar from "../components/NavigationBar";
 import { CheckCircle, Plus, X } from "phosphor-react-native";
-import { useNavigation } from "@react-navigation/native";
 import {
     getSelectedGenreList,
     setSelectedGenreList,

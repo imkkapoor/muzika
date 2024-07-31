@@ -6,8 +6,17 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import React, { useContext, useEffect, useRef, useState } from "react";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import React, {
+    useCallback,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
+import BottomSheet, {
+    BottomSheetBackdrop,
+    BottomSheetView,
+} from "@gorhom/bottom-sheet";
 import { MinusCircle, PaperPlaneTilt } from "phosphor-react-native";
 import { User } from "../UserContext";
 import { addSongIdToNotInterested } from "../functions/dbFunctions";
@@ -55,6 +64,17 @@ const ShareBottomSheet = ({
         }
     }, [isBottomSheetVisible]);
 
+    const renderBackdrop = useCallback(
+        (props) => (
+            <BottomSheetBackdrop
+                {...props}
+                disappearsOnIndex={-1}
+                appearsOnIndex={0}
+            />
+        ),
+        []
+    );
+
     return (
         <>
             <BottomSheet
@@ -70,6 +90,7 @@ const ShareBottomSheet = ({
                     height: 5,
                     width: 55,
                 }}
+                backdropComponent={renderBackdrop}
             >
                 <BottomSheetView style={styles.contentContainer}>
                     <TouchableOpacity

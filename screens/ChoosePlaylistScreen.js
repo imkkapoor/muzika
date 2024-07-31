@@ -14,7 +14,7 @@ import {
 } from "react-native";
 
 import { useNavigation } from "@react-navigation/native";
-import LoadingFullScreen from "../components/LoadingFullScreen";
+import LoadingFullScreen from "../loaders/LoadingFullScreen";
 import { getAccessToken } from "../functions/localStorageFunctions";
 import { User } from "../UserContext";
 import EachPlaylist from "../components/EachPlaylist";

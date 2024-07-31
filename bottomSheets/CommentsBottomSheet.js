@@ -14,12 +14,15 @@ import React, {
     useRef,
     useState,
 } from "react";
-import BottomSheet, { BottomSheetTextInput } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+    BottomSheetBackdrop,
+    BottomSheetTextInput,
+} from "@gorhom/bottom-sheet";
 import { PaperPlaneRight } from "phosphor-react-native";
 import { User } from "../UserContext";
 import { addComment, addReply, getComments } from "../functions/dbFunctions";
-import EachComment from "./EachComment";
-import SkeletonLoader from "./SkeletonLoader";
+import EachComment from "../components/EachComment";
+import SkeletonLoader from "../loaders/SkeletonLoader";
 
 const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
     const sheetRef = useRef(null);
@@ -33,7 +36,6 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
     const [replyToCommentId, setReplyToCommentId] = useState(null);
     const [inputPlaceholder, setInputPlaceholder] =
         useState("Add a comment...");
-    const [isInputFocused, setIsInputFocused] = useState(false);
     const opacity = useRef(new Animated.Value(0)).current;
     const position = useRef(new Animated.Value(-50)).current;
 
@@ -75,7 +77,6 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
     const keyExtractor = useCallback((item) => item.id, []);
 
     const handleInputFocus = () => {
-        setIsInputFocused(true);
         Animated.parallel([
             Animated.timing(opacity, {
                 toValue: 1,
@@ -93,7 +94,6 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
     };
 
     const handleInputBlur = () => {
-        setIsInputFocused(false);
         Animated.parallel([
             Animated.timing(opacity, {
                 toValue: 0,
@@ -162,6 +162,18 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
             });
         }
     };
+
+    const renderBackdrop = useCallback(
+        (props) => (
+            <BottomSheetBackdrop
+                {...props}
+                disappearsOnIndex={-1}
+                appearsOnIndex={0}
+            />
+        ),
+        []
+    );
+
     return (
         <BottomSheet
             ref={sheetRef}
@@ -177,6 +189,7 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
                 width: 55,
             }}
             keyboardBehavior="extend"
+            backdropComponent={renderBackdrop}
         >
             <View style={styles.contentContainer}>
                 <Text style={styles.commentTitle}>Comments</Text>

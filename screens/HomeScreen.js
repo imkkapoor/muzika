@@ -19,15 +19,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import MusicCard from "../components/MusicCard";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import ShareBottomSheet from "../components/ShareBottomSheet";
-import LoadingFullScreen from "../components/LoadingFullScreen";
+import ShareBottomSheet from "../bottomSheets/ShareBottomSheet";
+import LoadingFullScreen from "../loaders/LoadingFullScreen";
 import { getPLaylistSpecificTracks } from "../functions/spotify";
 import {
     getNotInterestedSongIds,
     getPlaylistId,
 } from "../functions/dbFunctions";
 import { getAccessToken } from "../functions/localStorageFunctions";
-import CommentsBottomSheet from "../components/CommentsBottomSheet";
+import CommentsBottomSheet from "../bottomSheets/CommentsBottomSheet";
 import { User } from "../UserContext";
 
 const HomeScreen = () => {

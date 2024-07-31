@@ -1,5 +1,4 @@
 import {
-    ActivityIndicator,
     FlatList,
     Image,
     StyleSheet,
@@ -11,7 +10,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Heart } from "phosphor-react-native";
 import { getReplies, toggleCommentLike } from "../functions/dbFunctions";
 import EachReply from "./EachReply";
-import SkeletonLoader from "./SkeletonLoader";
+import SkeletonLoader from "../loaders/SkeletonLoader";
 
 const ReplyState = {
     HIDDEN: "hidden",
