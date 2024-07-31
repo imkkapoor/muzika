@@ -1,5 +1,6 @@
 import {
-    ActivityIndicator,
+    Easing,
+    Animated,
     FlatList,
     StyleSheet,
     Text,
@@ -32,6 +33,10 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
     const [replyToCommentId, setReplyToCommentId] = useState(null);
     const [inputPlaceholder, setInputPlaceholder] =
         useState("Add a comment...");
+    const [isInputFocused, setIsInputFocused] = useState(false);
+    const opacity = useRef(new Animated.Value(0)).current;
+    const position = useRef(new Animated.Value(-50)).current;
+
     useEffect(() => {
         setComment("");
     }, [songId]);
@@ -69,7 +74,40 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
 
     const keyExtractor = useCallback((item) => item.id, []);
 
+    const handleInputFocus = () => {
+        setIsInputFocused(true);
+        Animated.parallel([
+            Animated.timing(opacity, {
+                toValue: 1,
+                duration: 350,
+                useNativeDriver: true,
+                easing: Easing.ease,
+            }),
+            Animated.timing(position, {
+                toValue: 0,
+                duration: 350,
+                useNativeDriver: true,
+                easing: Easing.ease,
+            }),
+        ]).start();
+    };
+
     const handleInputBlur = () => {
+        setIsInputFocused(false);
+        Animated.parallel([
+            Animated.timing(opacity, {
+                toValue: 0,
+                duration: 350,
+                useNativeDriver: true,
+                easing: Easing.ease,
+            }),
+            Animated.timing(position, {
+                toValue: -150,
+                duration: 350,
+                useNativeDriver: true,
+                easing: Easing.ease,
+            }),
+        ]).start();
         setReplyToCommentId(null);
         setIsReplying(false);
         setInputPlaceholder("Add a comment...");
@@ -201,16 +239,24 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
                             onChangeText={setComment}
                             placeholder={inputPlaceholder}
                             placeholderTextColor="#979797"
+                            onFocus={handleInputFocus}
                             onBlur={handleInputBlur}
                         />
-                        <TouchableOpacity onPress={handleSubmit}>
-                            <PaperPlaneRight
-                                style={styles.sendButton}
-                                color="#979797"
-                                weight="fill"
-                                size={23}
-                            ></PaperPlaneRight>
-                        </TouchableOpacity>
+                        <Animated.View
+                            style={{
+                                opacity,
+                                transform: [{ translateX: position }],
+                            }}
+                        >
+                            <TouchableOpacity onPress={handleSubmit}>
+                                <PaperPlaneRight
+                                    style={styles.sendButton}
+                                    color="#979797"
+                                    weight="fill"
+                                    size={23}
+                                ></PaperPlaneRight>
+                            </TouchableOpacity>
+                        </Animated.View>
                     </View>
                 </View>
             </View>
@@ -306,7 +352,7 @@ const styles = StyleSheet.create({
 });
 
 const commentsSkeleton = StyleSheet.create({
-    skeletonParent:{
+    skeletonParent: {
         display: "flex",
         alignItems: "center",
         alignContent: "center",
@@ -345,4 +391,3 @@ const commentsSkeleton = StyleSheet.create({
         borderRadius: 4,
     },
 });
-
