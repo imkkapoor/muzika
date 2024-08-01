@@ -26,7 +26,10 @@ import {
     getNotInterestedSongIds,
     getPlaylistId,
 } from "../functions/dbFunctions";
-import { getAccessToken } from "../functions/localStorageFunctions";
+import {
+    getAccessToken,
+    getSelectedGenreList,
+} from "../functions/localStorageFunctions";
 import CommentsBottomSheet from "../bottomSheets/CommentsBottomSheet";
 import { User } from "../UserContext";
 
@@ -90,14 +93,44 @@ const HomeScreen = () => {
         );
         return playableTracks;
     };
+    const getRandomSeedIds = (tracks, genres) => {
+        const seedTracks = tracks.map((track) => ({
+            type: "track",
+            id: track.id,
+        }));
+        const seedGenres = genres.map((genre) => ({
+            type: "genre",
+            id: genre.toLowerCase(),
+        }));
+
+        const combinedSeeds = [...seedTracks, ...seedGenres];
+
+        const shuffledSeeds = combinedSeeds.sort(() => 0.5 - Math.random());
+        const selectedSeeds = shuffledSeeds.slice(0, 5);
+
+        const selectedTrackIds = selectedSeeds
+            .filter((seed) => seed.type === "track")
+            .map((seed) => seed.id)
+            .join(",");
+        const selectedGenreIds = selectedSeeds
+            .filter((seed) => seed.type === "genre")
+            .map((seed) => seed.id)
+            .join(",");
+
+        return { selectedTrackIds, selectedGenreIds };
+    };
 
     const getRecommendations = async (tracks) => {
         const accessToken = await getAccessToken();
+        const genres = await getSelectedGenreList();
+        const { selectedTrackIds, selectedGenreIds } = getRandomSeedIds(
+            tracks,
+            genres
+        );
 
-        if (tracks.length > 0) {
-            const seedTracks = tracks.map((track) => track.id).join(",");
-            const url = `https://api.spotify.com/v1/recommendations?seed_tracks=${seedTracks}&limit=${numberOfTracksToBeFetched}`;
+        const url = `https://api.spotify.com/v1/recommendations?seed_tracks=${selectedTrackIds}&seed_genres=${selectedGenreIds}&limit=${numberOfTracksToBeFetched}`;
 
+        if (tracks.length > 0 || genres.length > 0) {
             try {
                 const response = await fetch(url, {
                     headers: {

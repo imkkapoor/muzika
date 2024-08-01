@@ -47,8 +47,10 @@ const getSelectedGenreList = async () => {
             const selectedGenreList = JSON.parse(list);
             return selectedGenreList;
         }
+        return [];
     } catch (error) {
-        return null;
+        console.error("Error fetching selected genres:", error);
+        return [];
     }
 };
 
