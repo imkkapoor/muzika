@@ -115,30 +115,6 @@ const CommentsBottomSheet = ({ isVisible, onClose, songId, songName }) => {
 
     const handleSubmit = () => {
         if (isReplying) {
-            const newReply = {
-                id: Date.now().toString(),
-                userId: currentUser.id,
-                username: currentUser.display_name,
-                content: comment,
-                likeCount: 0,
-                likedBy: [],
-                profileImage: currentUser?.images[1].url,
-            };
-
-            setCommentsToDisplay((prevComments) =>
-                prevComments.map((commentItem) =>
-                    commentItem.id === replyToCommentId
-                        ? {
-                              ...commentItem,
-                              replies: [
-                                  ...(commentItem.replies || []),
-                                  newReply,
-                              ],
-                          }
-                        : commentItem
-                )
-            );
-
             addReply({
                 reply: comment,
                 songId: songId,

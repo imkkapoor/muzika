@@ -234,17 +234,11 @@ const addReply = async ({
     }
     try {
         Keyboard.dismiss();
+
         setReply("");
-        setCommentsToDisplay((prevComments) =>
-            prevComments.map((comment) => {
-                if (comment.id === commentId) {
-                    return { ...comment, replyCount: comment.replyCount + 1 };
-                }
-                return comment;
-            })
-        );
         const commentDocRef = doc(db, "songs", songId, "comments", commentId);
         const replyId = await generateUniqueId();
+
         const replyData = {
             userId: currentUserId,
             username: name,
@@ -254,6 +248,18 @@ const addReply = async ({
             timestamp: Timestamp.now(),
             profileImage: imageLink,
         };
+
+        setCommentsToDisplay((prevComments) =>
+            prevComments.map((commentItem) =>
+                commentItem.id === commentId
+                    ? {
+                          ...commentItem,
+                          replies: [...(commentItem.replies || []), replyData],
+                          replyCount: (commentItem.replyCount || 0) + 1,
+                      }
+                    : commentItem
+            )
+        );
 
         await runTransaction(db, async (transaction) => {
             const commentDoc = await transaction.get(commentDocRef);
@@ -267,7 +273,9 @@ const addReply = async ({
             const newReplyCount = (commentDoc.data().replyCount || 0) + 1;
             transaction.update(commentDocRef, { replyCount: newReplyCount });
         });
+
         return replyId;
+    
     } catch (err) {
         setCommentsToDisplay((prevComments) =>
             prevComments.map((comment) => {
