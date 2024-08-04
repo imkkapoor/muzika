@@ -68,6 +68,16 @@ Enjoy high-quality audio playback and detailed song information with our custom 
     expo start
     ```
 
+## Work in Progress
+
+### Caching Data
+
+Currently, I am working on implementing a caching system to improve the app's performance.
+
+### Advanced Preferences
+
+I am also working on adding some advanced preferences to enhance user customization. These features will allow users to fine-tune their music recommendations and app settings according to their personal preferences, making the app even more tailored to individual needs.
+
 ## Contributing
 
 1. **Fork the repository**.
