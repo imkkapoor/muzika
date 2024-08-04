@@ -1,22 +1,22 @@
 # Muzika
 
-🎶 Welcome to Muzika 🎶
+🎶 **Welcome to Muzika** 🎶
 
 Dive into a world where your music journey is as dynamic as you are! Muzika is not just another app—it's your personal music companion that evolves with you.
 
-🌟 Discover a New Beat 🌟
+🌟 **Discover a New Beat** 🌟
 Muzika harnesses the power of Spotify's cutting-edge recommendation algorithm to bring you a personalized music experience. From your recent songs to your favorite genres and beyond, Muzika crafts a playlist that's uniquely yours.
 
-🔄 Endless Exploration 🔄
+🔄 **Endless Exploration** 🔄
 Swipe, scroll, and explore endlessly with our infinite scrolling feature. Every swipe brings you closer to discovering new tunes that align with your evolving musical taste. The more you interact, the smarter Muzika gets!
 
-🎤 Engage & Connect 🎤
+🎤 **Engage & Connect** 🎤
 Share your musical thoughts with comments, and dive into discussions with fellow music lovers. With a sleek commenting system and intuitive replies, Muzika transforms your listening experience into a vibrant community. This feature has been a major hit on Reddit, enhancing user engagement and interaction.
 
-🎸 Curated Just for You 🎸
+🎸 **Curated Just for You** 🎸
 Select up to 5 favorite genres and watch as Muzika refines its recommendations. Your music world expands with each genre you choose, ensuring that you always have fresh tracks to discover.
 
-🎧 Seamless Playback 🎧
+🎧 **Seamless Playback** 🎧
 Enjoy high-quality audio playback and detailed song information with our custom bottom sheets. Whether you're in the mood for a deep dive into a song or just want to enjoy seamless playback, Muzika has you covered.
 
 ## Installation
@@ -24,7 +24,7 @@ Enjoy high-quality audio playback and detailed song information with our custom 
 1. **Clone the repository**:
 
     ```bash
-    git clone https://github.com/yourusername/muzika.git
+    git clone https://github.com/imkkapoor/muzika.git
     cd muzika
     ```
 
@@ -35,7 +35,7 @@ Enjoy high-quality audio playback and detailed song information with our custom 
     ```
 
 3. **Set up environment variables**:
-   Create a `.env` file in the root of the project with your Spotify API and Firebase configuration. To get your Spotify credentials, you'll need to set up a Spotify Developer Account and create an application to obtain your credentials:
+   Create a `.env` file in the root of the project with your Spotify API and Firebase configuration. To get your Spotify credentials, you'll need to set up a [Spotify Developer Account](https://developer.spotify.com/dashboard) and create an application to obtain your credentials:
 
     ```
     CLIENT_ID=your_spotify_client_id

@@ -180,7 +180,7 @@ const ProfileScreen = () => {
                                         onPress={handleLogout}
                                         style={styles.buttonBox}
                                     >
-                                        <Text style={styles.buttonText}>
+                                        <Text style={[styles.buttonText, {color:"red"}]}>
                                             Submit
                                         </Text>
                                     </TouchableOpacity>

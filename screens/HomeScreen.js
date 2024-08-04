@@ -321,6 +321,7 @@ const HomeScreen = () => {
                             snapToAlignment="start"
                             decelerationRate="fast"
                             ListFooterComponent={listFooterComponent}
+                            onEndReachedThreshold={0.6}
                         />
                     )}
                 </SafeAreaView>
