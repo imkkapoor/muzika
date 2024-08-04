@@ -1,6 +1,7 @@
 import {
     Alert,
     Image,
+    Modal,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -44,7 +45,17 @@ const MusicCard = ({
     const [isAdded, setIsAdded] = useState(false);
     const maxTitleLength = 17;
     const maxArtistNameLength = 32;
+    const [isModalVisible, setIsModalVisible] = useState(false);
     const [positionMillis, setPositionMillis] = useState(0);
+
+    useEffect(() => {
+        if (isModalVisible) {
+            const timer = setTimeout(() => {
+                setIsModalVisible(false);
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [isModalVisible]);
 
     useEffect(() => {
         if (activeSongId === item.id) {
@@ -210,6 +221,8 @@ const MusicCard = ({
             const data = await response.json();
             addSongToRecentAdds(currentUser);
             setIsAdded(true);
+            setWaitingPlaylistAddition(false);
+            setIsModalVisible(true);
         } catch (error) {
             console.error("Error adding track to the playlist:", error);
             Alert.alert("Please try again!");
@@ -335,6 +348,30 @@ const MusicCard = ({
                 </Text>
                 <Text style={styles.duration}>0:30</Text>
             </View>
+            <Modal
+                transparent={true}
+                animationType="fade"
+                visible={isModalVisible}
+                onRequestClose={() => setIsModalVisible(false)}
+            >
+                <View style={styles.modalBackground}>
+                    <View style={styles.modalContainer}>
+                        <CheckCircle color="white" size={60} weight="light" />
+
+                        <Text
+                            style={{
+                                color: "white",
+                                fontSize: 12,
+                                fontFamily: "Inter-Medium",
+                                textAlign: "center",
+                                marginTop: 6,
+                            }}
+                        >
+                            Song added to playlist
+                        </Text>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 };
@@ -454,5 +491,18 @@ const styles = StyleSheet.create({
         color: "white",
         fontSize: 11,
         fontFamily: "Inter-ExtraLight",
+    },
+    modalBackground: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    modalContainer: {
+        width: 150,
+        padding: 20,
+        backgroundColor: "rgba(33,33,35,0.95)",
+        borderRadius: 20,
+        alignItems: "center",
     },
 });

@@ -50,7 +50,7 @@ const ShareBottomSheet = ({
             const timer = setTimeout(() => {
                 setIsModalVisible(false);
             }, 1000);
-            return () => clearTimeout(timer); // Cleanup the timeout if the component unmounts or the effect re-runs
+            return () => clearTimeout(timer); 
         } else {
             sheetRef.current?.close();
         }
