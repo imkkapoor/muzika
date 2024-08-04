@@ -10,15 +10,28 @@ Muzika harnesses the power of Spotify's cutting-edge recommendation algorithm to
 
 🔄 **Endless Exploration** 🔄
 
-Swipe, scroll, and explore endlessly with our infinite scrolling feature. Every swipe brings you closer to discovering new tunes that align with your evolving musical taste. The more you interact, the smarter Muzika gets!
+Swipe, scroll, and explore endlessly with our infinite scrolling feature. Every swipe brings you closer to discovering new tunes that align with your evolving musical taste.
+
+<img src="./assets/demo/IMG_3981.PNG" alt="App Screenshot" height="400">
+<img src="./assets/demo/IMG_3978.PNG" alt="App Screenshot" height="400">
+<img src="./assets/demo/IMG_3968.PNG" alt="App Screenshot" height="400">
+
+
+<br></br>
 
 🎤 **Engage & Connect** 🎤
 
 Share your musical thoughts with comments, and dive into discussions with fellow music lovers. With a sleek commenting system and intuitive replies, Muzika transforms your listening experience into a vibrant community. This feature has been a major hit on Reddit, enhancing user engagement and interaction.
 
+<img src="./assets/demo/IMG_3975.PNG" alt="App Screenshot" height="400">
+<br></br>
+
 🎸 **Curated Just for You** 🎸
 
 Select up to 5 favorite genres and watch as Muzika refines its recommendations. Your music world expands with each genre you choose, ensuring that you always have fresh tracks to discover.
+
+<img src="./assets/demo/IMG_3977.PNG" alt="App Screenshot" height="400">
+<br></br>
 
 🎧 **Seamless Playback** 🎧
 
@@ -72,11 +85,11 @@ Enjoy high-quality audio playback and detailed song information with our custom 
 
 1. **Caching Data**
 
-Currently, I am working on implementing a caching system to improve the app's performance.
+    Currently, I am working on implementing a caching system to improve the app's performance.
 
 2. **Advanced Preferences**
 
-I am also working on adding some advanced preferences to enhance user customization. These features will allow users to fine-tune their music recommendations and app settings according to their personal preferences, making the app even more tailored to individual needs.
+    I am also working on adding some advanced preferences to enhance user customization. These features will allow users to fine-tune their music recommendations and app settings according to their personal preferences, making the app even more tailored to individual needs.
 
 ## Contributing
 
