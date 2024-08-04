@@ -6,44 +6,24 @@
 Dive into a world where your music journey is as dynamic as you are! Muzika is not just another app—it's your personal music companion that evolves with you.
 
 🌟 **Discover a New Beat** 🌟
+
 Muzika harnesses the power of Spotify's cutting-edge recommendation algorithm to bring you a personalized music experience. From your recent songs to your favorite genres and beyond, Muzika crafts a playlist that's uniquely yours.
 
 🔄 **Endless Exploration** 🔄
+
 Swipe, scroll, and explore endlessly with our infinite scrolling feature. Every swipe brings you closer to discovering new tunes that align with your evolving musical taste. The more you interact, the smarter Muzika gets!
 
 🎤 **Engage & Connect** 🎤
+
 Share your musical thoughts with comments, and dive into discussions with fellow music lovers. With a sleek commenting system and intuitive replies, Muzika transforms your listening experience into a vibrant community. This feature has been a major hit on Reddit, enhancing user engagement and interaction.
 
 🎸 **Curated Just for You** 🎸
+
 Select up to 5 favorite genres and watch as Muzika refines its recommendations. Your music world expands with each genre you choose, ensuring that you always have fresh tracks to discover.
 
 🎧 **Seamless Playback** 🎧
+
 Enjoy high-quality audio playback and detailed song information with our custom bottom sheets. Whether you're in the mood for a deep dive into a song or just want to enjoy seamless playback, Muzika has you covered.
-=======
-🎶 Welcome to Múzika 🎶
-
-Dive into a world where your music journey is as dynamic as you are! Muzika is not just another app—it's your personal music companion that evolves with you.
-
-🌟 Discover a New Beat 🌟
-
-Múzika harnesses the power of Spotify's cutting-edge recommendation algorithm to bring you a personalized music experience. From your recent songs to your favorite genres and beyond, Múzika crafts a playlist that's uniquely yours.
-
-🔄 Endless Exploration 🔄
-
-Swipe, scroll, and explore endlessly with our infinite scrolling feature. Every swipe brings you closer to discovering new tunes that align with your evolving musical taste. The more you interact, the smarter Múzika gets!
-
-🎤 Engage & Connect 🎤
-
-Share your musical thoughts with comments, and dive into discussions with fellow music lovers. With a sleek commenting system and intuitive replies, Múzika transforms your listening experience into a vibrant community. This feature has been a major hit on Reddit, enhancing user engagement and interaction.
-
-🎸 Curated Just for You 🎸
-
-Select up to 5 favorite genres and watch as Múzika refines its recommendations. Your music world expands with each genre you choose, ensuring that you always have fresh tracks to discover.
-
-🎧 Seamless Playback 🎧
-
-Enjoy high-quality audio playback and detailed song information with our custom bottom sheets. Whether you're in the mood for a deep dive into a song or just want to enjoy seamless playback, Múzika has you covered.
->>>>>>> d4b65fbe1a159d4bf731a5cc1d34f9e5b2398c8b
 
 ## Installation
 
