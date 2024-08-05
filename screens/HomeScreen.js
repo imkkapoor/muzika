@@ -15,7 +15,6 @@ import React, {
     useRef,
     useState,
 } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import MusicCard from "../components/MusicCard";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -29,6 +28,8 @@ import {
 import {
     getAccessToken,
     getSelectedGenreList,
+    loadFromCache,
+    saveToCache,
 } from "../functions/localStorageFunctions";
 import CommentsBottomSheet from "../bottomSheets/CommentsBottomSheet";
 import { User } from "../UserContext";
@@ -153,6 +154,11 @@ const HomeScreen = () => {
                             )
                     );
 
+                    const newRecommendations = [
+                        ...prevRecommendations,
+                        ...uniqueTracks,
+                    ];
+
                     if (
                         prevRecommendations.length === 0 &&
                         playableTracks.length > 0
@@ -163,7 +169,9 @@ const HomeScreen = () => {
                         );
                         setActiveSongName(playableTracks[0].name);
                     }
-                    return [...prevRecommendations, ...uniqueTracks];
+                    saveToCache(newRecommendations.slice(-5));
+
+                    return newRecommendations;
                 });
             } catch (err) {
                 setError(err.message);
@@ -173,27 +181,22 @@ const HomeScreen = () => {
         }
     };
 
-    // delete after
-    const sample = async () => {
-        const data = await AsyncStorage.getItem("sampleSongs");
-
-        if (data) {
-            const sampleSongs = JSON.parse(data);
-            setRecommendations(sampleSongs);
-        }
-    };
-
     useEffect(() => {
-        const fetchData = async () => {
-            if (currentUser) {
-                await getAlreadyPresentTrackIds();
-                setNotInterestedSongIds(
-                    await getNotInterestedSongIds(currentUser)
-                );
-                await getTopSongs();
+        const initialize = async () => {
+            await loadFromCache(setRecommendations, setLoading);
+
+            if (!recommendations.length) {
+                if (currentUser) {
+                    await getAlreadyPresentTrackIds();
+                    setNotInterestedSongIds(
+                        await getNotInterestedSongIds(currentUser)
+                    );
+                    await getTopSongs();
+                }
             }
         };
-        fetchData();
+
+        initialize();
     }, [currentUser]);
 
     useEffect(() => {

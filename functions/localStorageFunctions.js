@@ -80,6 +80,39 @@ const setSelectedGenreList = async (selectedGenres) => {
     );
 };
 
+const saveToCache = async (newRecommendations) => {
+    const cacheData = {
+        timestamp: Date.now(),
+        recommendations: newRecommendations.slice(-5),
+    };
+    try {
+        await AsyncStorage.setItem(
+            "cachedRecommendations",
+            JSON.stringify(cacheData)
+        );
+    } catch (error) {
+        console.error("Error saving to cache", error);
+    }
+};
+
+const loadFromCache = async (setRecommendations, setLoading) => {
+    try {
+        const cache = await AsyncStorage.getItem("cachedRecommendations");
+        if (cache) {
+            const { timestamp, recommendations } = JSON.parse(cache);
+            const oneHour = 3600000;
+            if (Date.now() - timestamp < oneHour) {
+                setRecommendations(recommendations);
+                setLoading(false);
+            } else {
+                await AsyncStorage.removeItem("cachedRecommendations");
+            }
+        }
+    } catch (error) {
+        console.error("Error loading from cache", error);
+    }
+};
+
 export {
     getUserProfile,
     getAccessToken,
@@ -90,4 +123,6 @@ export {
     setSelectedPlaylistId,
     setSelectedGenreList,
     getSelectedGenreList,
+    saveToCache,
+    loadFromCache,
 };
