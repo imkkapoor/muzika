@@ -56,6 +56,7 @@ Enjoy high-quality audio playback and detailed song information with our custom 
     ```
 
 3. **Set up environment variables**:
+   
    Create a `.env` file in the root of the project with your Spotify API and Firebase configuration. To get your Spotify credentials, you'll need to set up a [Spotify Developer Account](https://developer.spotify.com/dashboard) and create an application to obtain your credentials:
 
     ```

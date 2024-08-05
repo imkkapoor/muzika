@@ -361,10 +361,11 @@ const MusicCard = ({
                         <Text
                             style={{
                                 color: "white",
-                                fontSize: 12,
+                                fontSize: 13,
                                 fontFamily: "Inter-Medium",
                                 textAlign: "center",
                                 marginTop: 6,
+                                lineHeight: 18,
                             }}
                         >
                             Song added to playlist

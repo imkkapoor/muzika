@@ -183,7 +183,11 @@ const HomeScreen = () => {
 
     useEffect(() => {
         const initialize = async () => {
-            await loadFromCache(setRecommendations, setLoading);
+            try {
+                await loadFromCache(setRecommendations, setLoading);
+            } catch (err) {
+                console.error("Error loading from cache", error);
+            }
 
             if (!recommendations.length) {
                 if (currentUser) {
