@@ -12,10 +12,9 @@ Muzika harnesses the power of Spotify's cutting-edge recommendation algorithm to
 
 Swipe, scroll, and explore endlessly with our infinite scrolling feature. Every swipe brings you closer to discovering new tunes that align with your evolving musical taste.
 
-<img src="./assets/demo/IMG_3981.PNG" alt="App Screenshot" height="400">
-<img src="./assets/demo/IMG_3978.PNG" alt="App Screenshot" height="400">
-<img src="./assets/demo/IMG_3968.PNG" alt="App Screenshot" height="400">
-
+<img src="./assets/demo/home.png" alt="App Screenshot" height="400">
+<img src="./assets/demo/playlist.png" alt="App Screenshot" height="400">
+<img src="./assets/demo/profile.png" alt="App Screenshot" height="400">
 
 <br></br>
 
@@ -23,14 +22,14 @@ Swipe, scroll, and explore endlessly with our infinite scrolling feature. Every 
 
 Share your musical thoughts with comments, and dive into discussions with fellow music lovers. With a sleek commenting system and intuitive replies, Muzika transforms your listening experience into a vibrant community. This feature has been a major hit on Reddit, enhancing user engagement and interaction.
 
-<img src="./assets/demo/IMG_3975.PNG" alt="App Screenshot" height="400">
+<img src="./assets/demo/comments.png" alt="App Screenshot" height="400">
 <br></br>
 
 🎸 **Curated Just for You** 🎸
 
 Select up to 5 favorite genres and watch as Muzika refines its recommendations. Your music world expands with each genre you choose, ensuring that you always have fresh tracks to discover.
 
-<img src="./assets/demo/IMG_3977.PNG" alt="App Screenshot" height="400">
+<img src="./assets/demo/genres.png" alt="App Screenshot" height="400">
 <br></br>
 
 🎧 **Seamless Playback** 🎧
