@@ -85,9 +85,7 @@ const LoginScreen = () => {
                 const currentTime = Date.now();
 
                 if (currentTime < parseInt(expirationDate)) {
-                    //token is still valid
                     await getAndCheckUser();
-                    // navigation.replace("Main");
                 } else {
                     // token is expired
                     if (refreshToken) {

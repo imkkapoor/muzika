@@ -10,7 +10,6 @@ Dive into a world where your music journey is as dynamic as you are! Muzika is n
 Muzika harnesses the power of Spotify's cutting-edge recommendation algorithm to bring you a personalized music experience. From your recent songs to your favorite genres and beyond, Muzika crafts a playlist that's uniquely yours.
 <br></br>
 
-
 🔄 **Endless Exploration** 🔄
 
 Swipe, scroll, and explore endlessly with our infinite scrolling feature. Every swipe brings you closer to discovering new tunes that align with your evolving musical taste.
@@ -87,13 +86,14 @@ Enjoy high-quality audio playback and detailed song information with our custom 
 
 ## Work in Progress 🛠️
 
-1. **Caching Data**
+-   [x] **Caching Data**
 
     Currently, I am working on implementing a caching system to improve the app's performance.
 
-2. **Advanced Preferences**
+-   [ ] **Advanced Preferences**
 
     I am also working on adding some advanced preferences to enhance user customization. These features will allow users to fine-tune their music recommendations and app settings according to their personal preferences, making the app even more tailored to individual needs.
+    
 
 ## Contributing
 
