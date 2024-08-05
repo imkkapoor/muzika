@@ -3,10 +3,13 @@
 🎶 **Welcome to Muzika** 🎶
 
 Dive into a world where your music journey is as dynamic as you are! Muzika is not just another app—it's your personal music companion that evolves with you.
+<br></br>
 
 🌟 **Discover a New Beat** 🌟
 
 Muzika harnesses the power of Spotify's cutting-edge recommendation algorithm to bring you a personalized music experience. From your recent songs to your favorite genres and beyond, Muzika crafts a playlist that's uniquely yours.
+<br></br>
+
 
 🔄 **Endless Exploration** 🔄
 
@@ -23,6 +26,7 @@ Swipe, scroll, and explore endlessly with our infinite scrolling feature. Every 
 Share your musical thoughts with comments, and dive into discussions with fellow music lovers. With a sleek commenting system and intuitive replies, Muzika transforms your listening experience into a vibrant community. This feature has been a major hit on Reddit, enhancing user engagement and interaction.
 
 <img src="./assets/demo/comments.png" alt="App Screenshot" height="400">
+
 <br></br>
 
 🎸 **Curated Just for You** 🎸
@@ -30,6 +34,7 @@ Share your musical thoughts with comments, and dive into discussions with fellow
 Select up to 5 favorite genres and watch as Muzika refines its recommendations. Your music world expands with each genre you choose, ensuring that you always have fresh tracks to discover.
 
 <img src="./assets/demo/genres.png" alt="App Screenshot" height="400">
+
 <br></br>
 
 🎧 **Seamless Playback** 🎧
