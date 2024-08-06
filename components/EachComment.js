@@ -11,6 +11,7 @@ import { Heart } from "phosphor-react-native";
 import { getReplies, toggleCommentLike } from "../functions/dbFunctions";
 import EachReply from "./EachReply";
 import SkeletonLoader from "../loaders/SkeletonLoader";
+import { timeAgo } from "../functions/timeUtils";
 
 const ReplyState = {
     HIDDEN: "hidden",
@@ -106,7 +107,7 @@ const EachComment = ({
 
     useEffect(() => {
         if (item.replies) {
-            setReplies([...item.replies, ...replies]);
+            setReplies([...replies,...item.replies]);
             if (item.replyCount > 1) {
                 setRepliesAreVisible(ReplyState.LOAD_MORE);
             } else {
@@ -134,7 +135,12 @@ const EachComment = ({
                 style={styles.profilePicture}
             />
             <View style={styles.nameAndComment}>
-                <Text style={styles.name}>{item.username}</Text>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <Text style={styles.name}>{item.username}</Text>
+                    <Text style={styles.timestamp}>
+                        {timeAgo(item.timestamp)}
+                    </Text>
+                </View>
                 <Text style={styles.comment}>{item.content}</Text>
                 <TouchableOpacity
                     style={styles.ReplyToAComment}
@@ -226,6 +232,7 @@ const styles = StyleSheet.create({
         width: 45,
         borderRadius: 100,
     },
+    timestamp: { marginLeft: 10, fontSize: 10, color: "#979797" },
     nameAndComment: { width: 240 },
     name: { fontSize: 12, fontFamily: "Inter-Bold", color: "white" },
     comment: {

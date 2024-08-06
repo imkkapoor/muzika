@@ -332,20 +332,24 @@ const HomeScreen = () => {
                         />
                     )}
                 </SafeAreaView>
-                <ShareBottomSheet
-                    isBottomSheetVisible={isBottomSheetVisible}
-                    onClose={() => setIsBottomSheetVisible(false)}
-                    setIsBottomSheetVisible={setIsBottomSheetVisible}
-                    url={activeSongShareUrl}
-                    name={activeSongName}
-                    itemId={activeSongId}
-                />
-                <CommentsBottomSheet
-                    isVisible={isCommentSectionVisible}
-                    onClose={() => setIsCommentSectionVisible(false)}
-                    songId={activeSongId}
-                    songName={activeSongName}
-                />
+                {isBottomSheetVisible && (
+                    <ShareBottomSheet
+                        isBottomSheetVisible={isBottomSheetVisible}
+                        onClose={() => setIsBottomSheetVisible(false)}
+                        setIsBottomSheetVisible={setIsBottomSheetVisible}
+                        url={activeSongShareUrl}
+                        name={activeSongName}
+                        itemId={activeSongId}
+                    />
+                )}
+                {isCommentSectionVisible && (
+                    <CommentsBottomSheet
+                        isVisible={isCommentSectionVisible}
+                        onClose={() => setIsCommentSectionVisible(false)}
+                        songId={activeSongId}
+                        songName={activeSongName}
+                    />
+                )}
 
                 {waitingPlaylistAddition && <LoadingFullScreen />}
             </View>

@@ -2,6 +2,7 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useState } from "react";
 import { Heart } from "phosphor-react-native";
 import { toggleReplyLike } from "../functions/dbFunctions";
+import { timeAgo } from "../functions/timeUtils";
 
 const EachReply = ({ item, currentUser, commentId, songId }) => {
     const [isLiked, setIsLiked] = useState(
@@ -40,12 +41,17 @@ const EachReply = ({ item, currentUser, commentId, songId }) => {
         <View style={styles.eachReplyContainer}>
             <Image
                 source={{
-                    uri: "https://i.scdn.co/image/ab6775700000ee8521e81d75b7c21a09ab00863b",
+                    uri: item.profileImage,
                 }}
                 style={styles.profilePicture}
             />
             <View style={styles.nameAndReply}>
-                <Text style={styles.name}>{item.username}</Text>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <Text style={styles.name}>{item.username}</Text>
+                    <Text style={styles.timestamp}>
+                        {timeAgo(item.timestamp)}
+                    </Text>
+                </View>
                 <Text style={styles.reply}>{item.content}</Text>
             </View>
             <View style={styles.replyContainer}>
@@ -101,4 +107,5 @@ const styles = StyleSheet.create({
         color: "white",
         marginTop: 2,
     },
+    timestamp: { marginLeft: 10, fontSize: 10, color: "#979797" },
 });

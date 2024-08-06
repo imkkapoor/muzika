@@ -307,7 +307,7 @@ export const getReplies = async ({ songId, commentId }) => {
             commentId,
             "replies"
         );
-        const q = query(repliesCollectionRef, orderBy("timestamp", "desc"));
+        const q = query(repliesCollectionRef, orderBy("timestamp", "asc"));
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
             replies.push({ id: doc.id, ...doc.data() });
