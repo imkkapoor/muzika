@@ -94,6 +94,10 @@ Enjoy high-quality audio playback and detailed song information with our custom 
 -   [ ] **Advanced Preferences**
 
     I am also working on adding some advanced preferences to enhance user customization. These features will allow users to fine-tune their music recommendations and app settings according to their personal preferences, making the app even more tailored to individual needs.
+
+-   [ ] **Making/Designing a Logo**
+
+    I am in the process of creating a logo for the app, aiming to encapsulate its essence and make it visually appealing to users.
     
 
 ## Contributing
