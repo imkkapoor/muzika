@@ -130,9 +130,12 @@ const ProfileScreen = () => {
                                 <ActivityIndicator size="small" color="white" />
                             ) : (
                                 <FlatList
+                                    horizontal={true}
+                                    scrollEnabled={true}
+                                    showsHorizontalScrollIndicator={false}
+                                    showsVerticalScrollIndicator={false}
                                     data={recentlyAddedTracks}
                                     renderItem={renderItem}
-                                    horizontal={true}
                                     snapToInterval={149}
                                     snapToAlignment="start"
                                     decelerationRate="fast"
@@ -180,7 +183,12 @@ const ProfileScreen = () => {
                                         onPress={handleLogout}
                                         style={styles.buttonBox}
                                     >
-                                        <Text style={[styles.buttonText, {color:"red"}]}>
+                                        <Text
+                                            style={[
+                                                styles.buttonText,
+                                                { color: "red" },
+                                            ]}
+                                        >
                                             Submit
                                         </Text>
                                     </TouchableOpacity>
@@ -188,6 +196,17 @@ const ProfileScreen = () => {
                             </View>
                         </View>
                     </Modal>
+                    <View
+                        style={{
+                            width: "100%",
+                            alignItems: "center",
+                            marginTop: 20,
+                        }}
+                    >
+                        <Text style={{ color: "white" }}>
+                            Made with love by vinayak 🫶🏼
+                        </Text>
+                    </View>
                 </SafeAreaView>
                 <ChangePreferencesBottomSheet
                     isChangePreferencesBottomSheetVisible={
