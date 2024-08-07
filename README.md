@@ -2,6 +2,9 @@
 ## Welcome to Muzika
 
 Dive into a world where your music  journey is as dynamic as you are! Muzika is not just another app—it's your personal music companion that evolves with you 🎶
+
+<img src="./assets/demo/login.png" alt="App Screenshot" height="400">
+
 <br></br>
 
 ## Features
