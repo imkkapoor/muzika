@@ -1,11 +1,11 @@
-# Múzika
 
-🎶 **Welcome to Muzika** 🎶
+## 🎶 Welcome to Muzika
 
 Dive into a world where your music journey is as dynamic as you are! Muzika is not just another app—it's your personal music companion that evolves with you.
 <br></br>
 
-🌟 **Discover a New Beat** 🌟
+## Features
+💡 **Discover a New Beat** 💡
 
 Muzika harnesses the power of Spotify's cutting-edge recommendation algorithm to bring you a personalized music experience. From your recent songs to your favorite genres and beyond, Muzika crafts a playlist that's uniquely yours.
 <br></br>
