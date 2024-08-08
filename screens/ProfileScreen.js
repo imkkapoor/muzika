@@ -107,7 +107,6 @@ const ProfileScreen = () => {
                             activeOpacity={0.6}
                             style={styles.preferencesButton}
                             onPress={() => {
-                                // navigation.navigate("ChangePreferences");
                                 setIsChangePreferencesBottomSheetVisible(true);
                             }}
                         >

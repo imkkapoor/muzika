@@ -71,6 +71,8 @@ const logout = async () => {
     AsyncStorage.removeItem("accessToken");
     AsyncStorage.removeItem("refreshToken");
     AsyncStorage.removeItem("expirationDate");
+    AsyncStorage.removeItem("userProfile");
+    await clearCache();
 };
 
 const setSelectedGenreList = async (selectedGenres) => {
@@ -110,6 +112,15 @@ const loadFromCache = async (setRecommendations, setLoading) => {
         }
     } catch (error) {
         console.error("Error loading from cache", error);
+    }
+};
+
+const clearCache = async () => {
+    try {
+        await AsyncStorage.removeItem("cachedRecommendations");
+        console.log("Cache cleared successfully");
+    } catch (error) {
+        console.error("Error clearing cache", error);
     }
 };
 

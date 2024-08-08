@@ -15,7 +15,6 @@ import {
     makeRedirectUri,
     useAuthRequest,
 } from "expo-auth-session";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { CLIENT_ID, REDIRECT_URI } from "@env";
 import { LinearGradient } from "expo-linear-gradient";
@@ -29,6 +28,8 @@ import {
     getAccessToken,
     getExpirationDate,
     getRefreshToken,
+    getUserProfile,
+    logout,
     setTokens,
 } from "../functions/localStorageFunctions";
 import { User } from "../UserContext";
@@ -85,7 +86,8 @@ const LoginScreen = () => {
                 const currentTime = Date.now();
 
                 if (currentTime < parseInt(expirationDate)) {
-                    await getAndCheckUser();
+                    setCurrentUser(await getUserProfile());
+                    navigation.replace("Main");
                 } else {
                     // token is expired
                     if (refreshToken) {
@@ -98,13 +100,12 @@ const LoginScreen = () => {
                                 "Failed to refresh the token. Please try logging in again!"
                             );
                             // in case the refresh token request ever goes wrong
-                            AsyncStorage.removeItem("accessToken");
-                            AsyncStorage.removeItem("refreshToken");
-                            AsyncStorage.removeItem("expirationDate");
+                            await logout();
                             return;
                         }
                         await setTokens(refreshResponse);
-                        await getAndCheckUser();
+                        setCurrentUser(await getUserProfile());
+                        navigation.replace("Main");
 
                         return;
                     }
