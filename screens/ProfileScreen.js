@@ -120,6 +120,24 @@ const ProfileScreen = () => {
                             />
                         </TouchableOpacity>
                     </View>
+                    <View style={[styles.preferencesButtonContainer, {marginTop:21}]}>
+                        <TouchableOpacity
+                            activeOpacity={0.6}
+                            style={styles.preferencesButton}
+                            onPress={() => {
+                                navigation.navigate("AdvancedFilters");
+                            }}
+                        >
+                            <Text style={styles.preferencesButtonText}>
+                                Advanced Filters
+                            </Text>
+                            <CaretRight
+                                size={19}
+                                color="white"
+                                style={{ marginLeft: 3 }}
+                            />
+                        </TouchableOpacity>
+                    </View>
                     <View style={styles.recentlyAddedBox}>
                         <Text style={styles.recentAddText}>
                             Your recent adds

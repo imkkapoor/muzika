@@ -5,7 +5,11 @@ import HomeScreen from "./screens/HomeScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import ChoosePlaylistScreen from "./screens/ChoosePlaylistScreen";
 import ChooseGenresScreen from "./screens/ChooseGenresScreen";
-import { ChangeSelectedGenre, ChangeSelectedPlaylist } from "./screens/ChangePreferencesScreen";
+import {
+    ChangeSelectedGenre,
+    ChangeSelectedPlaylist,
+} from "./screens/ChangePreferencesScreen";
+import AdvancedFilters from "./screens/AdvancedFilters";
 const Stack = createNativeStackNavigator();
 function Navigation() {
     return (
@@ -44,6 +48,11 @@ function Navigation() {
                 <Stack.Screen
                     name="ChooseGenre"
                     component={ChooseGenresScreen}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="AdvancedFilters"
+                    component={AdvancedFilters}
                     options={{ headerShown: false }}
                 />
             </Stack.Navigator>
