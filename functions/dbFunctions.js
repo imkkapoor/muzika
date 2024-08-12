@@ -275,7 +275,6 @@ const addReply = async ({
         });
 
         return replyId;
-    
     } catch (err) {
         setCommentsToDisplay((prevComments) =>
             prevComments.map((comment) => {
@@ -416,6 +415,17 @@ const storeGenreInFirestore = async (userProfile, selectedGenres) => {
     }
 };
 
+const storeAcousticnessInFirestore = async (userProfile, selectedValue) => {
+    try {
+        const userDocRef = doc(db, "users", userProfile.id);
+        await updateDoc(userDocRef, {
+            "preferences.acousticness": selectedValue,
+        });
+    } catch (err) {
+        console.error("Error storing user data in Firestore:", err);
+    }
+};
+
 export {
     getPlaylistId,
     checkUserExists,
@@ -428,4 +438,5 @@ export {
     toggleReplyLike,
     pushSelectedPlaylist,
     storeGenreInFirestore,
+    storeAcousticnessInFirestore,
 };

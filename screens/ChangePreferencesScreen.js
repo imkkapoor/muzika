@@ -113,7 +113,7 @@ const ChangeSelectedGenre = () => {
                 console.log("User profile is null");
             }
         } catch (err) {
-            console.log("Error in playlist selection:", err);
+            console.log("Error in genre selection:", err);
         } finally {
             setWaitingGenreAddition(false);
         }
